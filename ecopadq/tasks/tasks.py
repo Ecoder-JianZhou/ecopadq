@@ -59,6 +59,15 @@ def test(self, input_a, input_b):
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
     result = str(stdout.read())
     return result_file_path
+
+@app.task(bind=True)
+def jian(self, input_a, input_b):
+    task_id = str(self.request.id)
+    result_file_path="/data/output_jian_{0}.txt".format(task_id)
+    ssh_cmd = "cp {0} {1}".format("/data/test.txt", result_file_path)
+    stdin, stdout, stderr = client.exec_command(ssh_cmd)
+    result = str(stdout.read())
+    return result_file_path
 #@task()
 #def sub(a, b):
 #    """ Example task that subtracts two numbers or strings
