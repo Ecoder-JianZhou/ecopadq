@@ -1,0 +1,58 @@
+<html>
+<head lang="en">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <title>EcoPAD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Bootstrap Template">
+    <meta name="Mark Stacy" content="OU Libraries Informatics">
+    <link rel="stylesheet" href="/ecopad_portal/bower_components/boostrap_style/flatly/bootstrap.min.css">
+    <link rel="stylesheet" href="/ecopad_portal/style.css">
+</head>
+<body style="padding:10px;">
+<h3>{{ title }}</h3>
+<hr>
+
+
+<p class="" style="width:80%">{{ description }}</p>
+
+
+<hr>
+<div id="front_viz" style="padding-left:20px">
+    <div style="max-width:1000px">
+        <div style="width:100%">
+            <div style="width:40%;display:inline-block;">
+                <label style="width:100%;text-align:center;">{{ zero_label }}</label>
+                <img src="{{ zero_url }}" alt="{{ zero_alt_text }}" style="width:100%">
+            </div>
+            <div style="width:40%;display:inline-block;">
+                <label style="width:100%;text-align:center;">{{ one_label }}</label>
+                <img src="{{ one_url }}" alt="{{ one_alt_text }}" style="width:100%">
+            </div>
+        </div>
+        <div style="width:100%">
+            <div style="width:40%;display:inline-block;">
+                <label style="width:100%;text-align:center;">{{ two_label }}</label>
+                <img src="{{ two_url }}" alt="{{ two_alt_text }}" style="width:100%">
+            </div>
+            <div style="width:40%;display:inline-block;">
+                <label style="width:100%;text-align:center;">{{ three_label }}</label>
+                <img src="{{ three_url }}" alt="{{ three_alt_text }}" style="width:100%">
+            </div>
+        </div>
+        <div style="width:100%">
+            <div style="width:40%;display:inline-block;">
+                <label style="width:100%;text-align:center;">{{ four_label }}</label>
+                <img src="{{ four_url }}" alt="{{ four_alt_text }}" style="width:100%">
+            </div>
+            <div style="width:40%;display:inline-block;">
+                <label style="width:100%;text-align:center;">{{ five_label }}</label>
+                <img src="{{ five_url }}" alt="{{ five_alt_text }}" style="width:100%">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="/ecopad_portal/bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="/ecopad_portal/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+</html>
