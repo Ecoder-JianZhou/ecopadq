@@ -54,7 +54,8 @@ def test(self, input_a, input_b):
     
     client.connect('local_fortran_example',username=getenv('CELERY_SSH_USER'),password=getenv('CELERY_SSH_PASSWORD'))
     result_file_path="/data/output_{0}.txt".format(task_id)
-    ssh_cmd = "./test {0} {1} {2}".format(input_a, input_b, result_file_path)
+    # ssh_cmd = "./test {0} {1} {2}".format(input_a, input_b, result_file_path)
+    ssh_cmd = "cp {0} {1}".format("/data/test.txt", result_file_path)
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
     result = str(stdout.read())
     return result_file_path
