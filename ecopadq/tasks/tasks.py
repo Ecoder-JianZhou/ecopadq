@@ -69,7 +69,7 @@ def jian(self, input_a, input_b):
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
     result = str(stdout.read())
     import pandas as pd
-    dates = pd.read_csv('/data/output/Simu_dailyCH4.txt')
+    dates = pd.read_csv('/data/output/Simu_soiltemp.txt')
     data4w = dates.iloc[:,:2]
     data4w.columns = ["tx","xs"]
     data4w.to_csv(result_file_path, index=None)
