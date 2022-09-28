@@ -65,7 +65,7 @@ def jian(self, input_a, input_b):
     task_id = str(self.request.id)
     client.connect('local_fortran_example',username=getenv('CELERY_SSH_USER'),password=getenv('CELERY_SSH_PASSWORD'))
     result_file_path="/data/output_jian_{0}.txt".format(task_id)
-    ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format('input/SPRUCE_pars.txt', 'input/SPRUCE_forcing.txt', 'input/SPRUCE_obs.txt', 'output/', '0', 'input/SPRUCE_da_pars.txt')
+    ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format('input/SPRUCE_pars.txt', 'input/SPRUCE_forcing.txt', 'input/SPRUCE_obs.txt', '/data/output/', '0', 'input/SPRUCE_da_pars.txt')
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
     result = str(stdout.read())
     return result_file_path
