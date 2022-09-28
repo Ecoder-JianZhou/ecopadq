@@ -7,6 +7,7 @@ setup(name='ecopadq',
 #      package_data={'ecopadq':['ecopadq/tasks/templates/*.tmpl']},
       install_requires=[
         'paramiko',
+        'pandas', # zj: test data
 #       'dockertask @ git+git://github.com/ou-ecolab/dockertask.git@test#egg=dockertask',
 #       'celery',
 #       'requests',
