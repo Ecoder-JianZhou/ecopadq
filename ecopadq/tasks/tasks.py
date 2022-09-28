@@ -68,7 +68,7 @@ def jian(self, input_a, input_b):
     ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format('input/SPRUCE_pars.txt', 'input/SPRUCE_forcing.txt', 'input/SPRUCE_obs.txt', '/data/output/', '0', 'input/SPRUCE_da_pars.txt')
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
     result = str(stdout.read())
-    import pandas
+    import pandas as pd
     dates = pd.read_csv('/data/output/Simu_dailyCH4.txt')
     data4w = dates.iloc[:,:2]
     data4w.columns = ["tx","xs"]
