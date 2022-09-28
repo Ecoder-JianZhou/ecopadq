@@ -71,7 +71,7 @@ def jian(self, input_a, input_b):
     import pandas as pd
     dates = pd.read_csv('/data/output/Simu_soiltemp.txt')
     data4w = dates.iloc[:,:2]
-    data4w.columns = ["tx","xs"]
+    data4w.columns = ["ts","xs"]
     data4w.to_csv(result_file_path, index=None)
     # result_file_path=""
     return result_file_path
