@@ -97,7 +97,7 @@ def teco_spruce_simulation(self, pars): # ,model_type="0", da_params=None): # Ji
     task_id = str(self.request.id)
     resultDir = setup_result_directory(task_id)
     #create param file 
-    param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
+    # param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
     #Run Spruce TECO code 
     host_data_resultDir = "{0}/static/ecopad_tasks/{1}".format(host_data_dir,task_id)
     host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)	
@@ -349,24 +349,24 @@ def setup_result_directory(task_id):
    os.makedirs("{0}/plot".format(resultDir))
    return resultDir 
 #
-#def check_params(pars):
-#    """ Check params and make floats."""
-#    for param in ["latitude","longitude","wsmax","wsmin","LAIMAX","LAIMIN","SapS","SLA","GLmax","GRmax","Gsmax",
-#                    "extkU","alpha","Tau_Leaf","Tau_Wood","Tau_Root","Tau_F","Tau_C","Tau_Micro","Tau_SlowSOM",
-#                    "gddonset","Rl0" ]:
-#        try:
-#            inside_check(pars,param)
-#        except:
-#            pass
-#        try:
-#            inside_check(pars, "min_{0}".format(param))
-#        except:
-#            pass
-#        try:
-#            inside_check(pars, "max_{0}".format(param))
-#        except:
-#            pass
-#    return pars  
+def check_params(pars):
+   """ Check params and make floats."""
+   for param in ["latitude","longitude","wsmax","wsmin","LAIMAX","LAIMIN","SapS","SLA","GLmax","GRmax","Gsmax",
+                   "extkU","alpha","Tau_Leaf","Tau_Wood","Tau_Root","Tau_F","Tau_C","Tau_Micro","Tau_SlowSOM",
+                   "gddonset","Rl0" ]:
+       try:
+           inside_check(pars,param)
+       except:
+           pass
+       try:
+           inside_check(pars, "min_{0}".format(param))
+       except:
+           pass
+       try:
+           inside_check(pars, "max_{0}".format(param))
+       except:
+           pass
+   return pars  
 #
 #def inside_check(pars,param):
 #    if not "." in str(pars[param]):
