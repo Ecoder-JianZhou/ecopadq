@@ -12,7 +12,7 @@ import os
 #from pymongo import MongoClient
 #from datetime import datetime
 ##Default base directory 
-#basedir="/data/static/"
+basedir="/data/teco_spruce_test"
 #spruce_data_folder="/data/local/spruce_data"
 #host= 'ecolab.cybercommons.org'
 #host_data_dir = os.environ["host_data_dir"] 
