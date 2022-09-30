@@ -87,13 +87,14 @@ def jian(self, input_a, input_b):
 #
 #
 #
-@app.task()
+@app.task(bind=True)
 def teco_spruce_simulation(self, pars): # ,model_type="0", da_params=None): # Jian: add self to get the task ID
     """ Setup task convert parameters from html portal
     to file, and store the file in input folder.
     call teco_spruce_model.
     """
-    task_id = str(teco_spruce_simulation.request.id)
+    # task_id = str(teco_spruce_simulation.request.id)
+    task_id = str(self.request.id)
     resultDir = setup_result_directory(task_id)
     #create param file 
     param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
@@ -115,7 +116,6 @@ def teco_spruce_simulation(self, pars): # ,model_type="0", da_params=None): # Ji
     # end Jian
 
     # test Jian
-    task_id = str(self.request.id)
     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD'))
     result_file_path="/data/output_jian_{0}.txt".format(task_id)
     ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format('input/SPRUCE_pars.txt', 'input/SPRUCE_forcing.txt', 'input/SPRUCE_obs.txt', '/data/output/', '0', 'input/SPRUCE_da_pars.txt')
@@ -144,7 +144,7 @@ def teco_spruce_simulation(self, pars): # ,model_type="0", da_params=None): # Ji
     result_url ="http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id'])
     #report_url = "http://{0}/ecopad_tasks/{1}/{2}".format(result['host'],result['task_id'],"report.htm")
     #{"report":report_url,"data":result_url}
-    return result_url
+    return result_file_path
 #  
 #@task()
 #def teco_spruce_data_assimilation(pars):
