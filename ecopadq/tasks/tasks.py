@@ -7,7 +7,7 @@ from os import getenv
 #from jinja2 import Template
 #from shutil import copyfile, move
 #from glob import glob
-#import requests,os
+import requests,os
 #from pymongo import MongoClient
 #from datetime import datetime
 ##Default base directory 
