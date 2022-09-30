@@ -160,6 +160,8 @@ def create_template(model, site, tmpl_name,params,resultDir,check_function, fp_p
         template=Template(f.read())
     params_file = os.path.join(resultDir,'{0}.txt'.format(model+"_"+site+"_"+tmpl_name))
     with open(params_file,'w') as f2:
+        obj = check_function(fp_pars_ls, params)
+        print(obj)
         f2.write(template.render(check_function(fp_pars_ls, params)))
     return '{0}.txt'.format(tmpl_name)
 
