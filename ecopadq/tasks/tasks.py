@@ -166,7 +166,7 @@ def create_template(model, site, tmpl_name,params,resultDir,check_function, fp_p
 def check_params(filePath_pars_ls, pars):
     """ Check params and make floats."""
     dat_ls_pars = open(filePath_pars_ls, "r").read()   # Jian: get the list of pars from model folder
-    ls_pars     = my_file.replace("\n",'').replace("\"",'').split(",") # Jian: parser the list of pars
+    ls_pars     = dat_ls_pars.replace("\n",'').replace("\"",'').split(",") # Jian: parser the list of pars
     # for param in ["latitude","longitude","wsmax","wsmin","LAIMAX","LAIMIN","SapS","SLA","GLmax","GRmax","Gsmax",
     #                 "extkU","alpha","Tau_Leaf","Tau_Wood","Tau_Root","Tau_F","Tau_C","Tau_Micro","Tau_SlowSOM",
     #                 "gddonset","Rl0" ]:
