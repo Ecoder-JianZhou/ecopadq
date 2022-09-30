@@ -136,7 +136,7 @@ def check_files(model, site):
     input_files["forcing"]   = os.path.join(basedir, "model_infos/", site, site+"_forcing.txt")
     input_files["pars"]      = os.path.join(basedir, "model_infos/", site, site+"_pars.txt")
     input_files["da_pars"]   = os.path.join(basedir, "model_infos/", site, site+"_da_pars.txt")
-    for key, f_path in input_files.iterm():
+    for key, f_path in input_files.items():
         if key == "da_pars":
             if not os.path.exists(f_path): input_files[key] == None
         else:
