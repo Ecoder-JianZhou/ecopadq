@@ -86,7 +86,7 @@ def jian(self, input_a, input_b):
 #
 #
 #
-@task()
+@app.task()
 def teco_spruce_simulation(pars): # ,model_type="0", da_params=None):
    """ Setup task convert parameters from html portal
 	to file, and store the file in input folder.
