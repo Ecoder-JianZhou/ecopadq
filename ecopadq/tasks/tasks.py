@@ -86,48 +86,48 @@ def jian(self, input_a, input_b):
 #
 #
 #
-#@task()
-#def teco_spruce_simulation(pars): # ,model_type="0", da_params=None):
-#    """ Setup task convert parameters from html portal
-#	to file, and store the file in input folder.
-#	call teco_spruce_model.
-#    """
-#    task_id = str(teco_spruce_simulation.request.id)
-#    resultDir = setup_result_directory(task_id)
-#    #create param file 
-#    param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
-#    #Run Spruce TECO code 
-#    host_data_resultDir = "{0}/static/ecopad_tasks/{1}".format(host_data_dir,task_id)
-#    host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)	
-#    docker_opts = "-v {0}:/data:z -v {1}:/spruce_data:z".format(host_data_resultDir,host_data_dir_spruce_data)
-#    docker_cmd = "{0} {1} {2} {3} {4} {5}".format("/data/{0}".format(param_filename),"/spruce_data/SPRUCE_forcing.txt",
-#                                    "/spruce_data/SPRUCE_obs.txt",
-#                                    "/data", 0 , "/spruce_data/SPRUCE_da_pars.txt")
-#    result = docker_task(docker_name="teco_spruce",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
-#    #Run R Plots
-#    #os.makedirs("{0}/graphoutput".format(host_data_resultDir)) #make plot directory
-#    docker_opts = "-v {0}:/usr/local/src/myscripts/graphoutput:z ".format(host_data_resultDir)
-#    docker_cmd = None
-#    result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
-#   
-#
-#    #Clean up result Directory
-#    clean_up(resultDir)
-#    #Create Report
-#    report_data ={'zero_label':'GPP','zero_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'gpp.png'),
-#                'one_label':'ER','one_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'er.png'),
-#                'two_label':'Foliage','two_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'foliage.png'),
-#                'three_label':'Wood','three_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'wood.png'),
-#                'four_label':'Root','four_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'root.png'),
-#                'five_label':'Soil','five_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'soil.png')}
-#    report_data['title']="SPRUCE Ecological Simulation Task Report"
-#    report_data['description']="Simulations of carbon fluxes and pool sizes for SPRUCE experiment based on user defined initial parameters."
-#
-#    report = create_report('report',report_data,resultDir)
-#    result_url ="http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id'])
-#    #report_url = "http://{0}/ecopad_tasks/{1}/{2}".format(result['host'],result['task_id'],"report.htm")
-#    #{"report":report_url,"data":result_url}
-#    return result_url
+@task()
+def teco_spruce_simulation(pars): # ,model_type="0", da_params=None):
+   """ Setup task convert parameters from html portal
+	to file, and store the file in input folder.
+	call teco_spruce_model.
+   """
+   task_id = str(teco_spruce_simulation.request.id)
+   resultDir = setup_result_directory(task_id)
+   #create param file 
+   param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
+   #Run Spruce TECO code 
+   host_data_resultDir = "{0}/static/ecopad_tasks/{1}".format(host_data_dir,task_id)
+   host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)	
+   docker_opts = "-v {0}:/data:z -v {1}:/spruce_data:z".format(host_data_resultDir,host_data_dir_spruce_data)
+   docker_cmd = "{0} {1} {2} {3} {4} {5}".format("/data/{0}".format(param_filename),"/spruce_data/SPRUCE_forcing.txt",
+                                   "/spruce_data/SPRUCE_obs.txt",
+                                   "/data", 0 , "/spruce_data/SPRUCE_da_pars.txt")
+   result = docker_task(docker_name="teco_spruce",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+   #Run R Plots
+   #os.makedirs("{0}/graphoutput".format(host_data_resultDir)) #make plot directory
+   docker_opts = "-v {0}:/usr/local/src/myscripts/graphoutput:z ".format(host_data_resultDir)
+   docker_cmd = None
+   result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+  
+
+   #Clean up result Directory
+   clean_up(resultDir)
+   #Create Report
+   report_data ={'zero_label':'GPP','zero_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'gpp.png'),
+               'one_label':'ER','one_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'er.png'),
+               'two_label':'Foliage','two_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'foliage.png'),
+               'three_label':'Wood','three_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'wood.png'),
+               'four_label':'Root','four_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'root.png'),
+               'five_label':'Soil','five_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'soil.png')}
+   report_data['title']="SPRUCE Ecological Simulation Task Report"
+   report_data['description']="Simulations of carbon fluxes and pool sizes for SPRUCE experiment based on user defined initial parameters."
+
+   report = create_report('report',report_data,resultDir)
+   result_url ="http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id'])
+   #report_url = "http://{0}/ecopad_tasks/{1}/{2}".format(result['host'],result['task_id'],"report.htm")
+   #{"report":report_url,"data":result_url}
+   return result_url
 #  
 #@task()
 #def teco_spruce_data_assimilation(pars):
