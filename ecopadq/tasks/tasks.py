@@ -2,12 +2,13 @@ from celery import Celery
 import celeryconfig
 #from dockertask import docker_task
 from paramiko import SSHClient, AutoAddPolicy
-from os import getenv
+# from os import getenv
+import os
 #from subprocess import call,STDOUT
 #from jinja2 import Template
 #from shutil import copyfile, move
 #from glob import glob
-import requests,os
+# import requests,os  # Jian: no module named 'requests'
 #from pymongo import MongoClient
 #from datetime import datetime
 ##Default base directory 
@@ -52,7 +53,7 @@ def test(self, input_a, input_b):
     # webroot directory.
     task_id = str(self.request.id)
     
-    client.connect('local_fortran_example',username=getenv('CELERY_SSH_USER'),password=getenv('CELERY_SSH_PASSWORD'))
+    client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD'))
     result_file_path="/data/output_{0}.txt".format(task_id)
     # ssh_cmd = "./test {0} {1} {2}".format(input_a, input_b, result_file_path)
     ssh_cmd = "cp {0} {1}".format("/data/test.txt", result_file_path)
@@ -63,7 +64,7 @@ def test(self, input_a, input_b):
 @app.task(bind=True)
 def jian(self, input_a, input_b):
     task_id = str(self.request.id)
-    client.connect('local_fortran_example',username=getenv('CELERY_SSH_USER'),password=getenv('CELERY_SSH_PASSWORD'))
+    client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD'))
     result_file_path="/data/output_jian_{0}.txt".format(task_id)
     ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format('input/SPRUCE_pars.txt', 'input/SPRUCE_forcing.txt', 'input/SPRUCE_obs.txt', '/data/output/', '0', 'input/SPRUCE_da_pars.txt')
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
