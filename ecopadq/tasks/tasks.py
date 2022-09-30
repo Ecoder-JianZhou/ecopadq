@@ -324,13 +324,13 @@ def teco_spruce_simulation(pars): # ,model_type="0", da_params=None):
 #        f2.write(template.render(data))
 #    return '{0}.htm'.format(tmpl_name)
 #
-#def setup_result_directory(task_id):
-#    resultDir = os.path.join(basedir, 'ecopad_tasks/', task_id)
-#    os.makedirs(resultDir)
-#    os.makedirs("{0}/input".format(resultDir))
-#    os.makedirs("{0}/output".format(resultDir))
-#    os.makedirs("{0}/plot".format(resultDir))
-#    return resultDir 
+def setup_result_directory(task_id):
+   resultDir = os.path.join(basedir, 'ecopad_tasks/', task_id)
+   os.makedirs(resultDir)
+   os.makedirs("{0}/input".format(resultDir))
+   os.makedirs("{0}/output".format(resultDir))
+   os.makedirs("{0}/plot".format(resultDir))
+   return resultDir 
 #
 #def check_params(pars):
 #    """ Check params and make floats."""
