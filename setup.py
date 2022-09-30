@@ -11,7 +11,7 @@ setup(name='ecopadq',
 #       'dockertask @ git+git://github.com/ou-ecolab/dockertask.git@test#egg=dockertask',
 #       'celery',
 #       'requests',
-#       'jinja2',
+        'jinja2', # Jian
       ],
 #      dependency_links=[
 #          'https://github.com/ouinformatics/dockertask/tarball/master#egg=dockertask-0.0',
