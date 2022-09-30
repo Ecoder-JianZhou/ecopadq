@@ -176,7 +176,7 @@ def check_params(filePath_pars_ls, pars):
     for param in ls_pars:
         try:
             inside_check(pars,param)
-        except Exception  e:
+        except Exception as e:
             print("ettttt:", e)
             pass
         try:
