@@ -12,10 +12,10 @@ import os
 #from pymongo import MongoClient
 #from datetime import datetime
 ##Default base directory 
-basedir="/data/teco_spruce_test"
+basedir="/data/ecopad_test"
 #spruce_data_folder="/data/local/spruce_data"
 #host= 'ecolab.cybercommons.org'
-#host_data_dir = os.environ["host_data_dir"] 
+# host_data_dir = os.environ["host_data_dir"] 
 ## "/home/ecopad/ecopad/data/static"
 
 client=SSHClient()
@@ -76,75 +76,182 @@ def jian(self, input_a, input_b):
     data4w.to_csv(result_file_path, index=None)
     # result_file_path=""
     return result_file_path
-#@task()
-#def sub(a, b):
-#    """ Example task that subtracts two numbers or strings
-#        args: x and y
-#        return substraction of strings
-#    """
-#    result1 = a - b
-#    return result1
-#
-#
-#
+
+# changed by Jian: 
+#   Ecopad includes the functions:
+#       1. choose model, forcing data, parameter files.
+#           input values: "model_name" represents the model name and related files (list of params)
+#           site value: paramters file, forcing data file.
+#       2. functions:
+#           run_simulation;
+#           run_data_assimilation;
+#           run_forecast;
+
 @app.task(bind=True)
-def teco_spruce_simulation(self, pars): # ,model_type="0", da_params=None): # Jian: add self to get the task ID
-    """ Setup task convert parameters from html portal
-    to file, and store the file in input folder.
-    call teco_spruce_model.
-    """
-    # task_id = str(teco_spruce_simulation.request.id)
-    task_id = str(self.request.id)
-    resultDir = setup_result_directory(task_id)
+def run_simulation(self, model_name, site_name):
+    ''' setup task convert model name and input path (forcing data and parameters) from html portal to files
+        store the files in the input file of EcoPad.
+        SSH call model to run the simulation.
+    '''
+    task_id = str(self.request.id) # Get the task id from portal
+    # check the files in input_path: forcing_data.txt; paramater_data.txt;
+    input_files = check_files(model_name, site_name)
+    resultDir   = setup_result_directory(task_id)
     #create param file 
-    # param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
-    #Run Spruce TECO code 
-    host_data_resultDir = "{0}/static/ecopad_tasks/{1}".format(host_data_dir,task_id)
-    host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)	
-
-    # Jian: no docker for teco, now using the SSH to local fortran
-    #    docker_opts = "-v {0}:/data:z -v {1}:/spruce_data:z".format(host_data_resultDir,host_data_dir_spruce_data)
-    #    docker_cmd = "{0} {1} {2} {3} {4} {5}".format("/data/{0}".format(param_filename),"/spruce_data/SPRUCE_forcing.txt",
-    #                                    "/spruce_data/SPRUCE_obs.txt",
-    #                                    "/data", 0 , "/spruce_data/SPRUCE_da_pars.txt")
-    #    result = docker_task(docker_name="teco_spruce",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
-    #    #Run R Plots
-    #    #os.makedirs("{0}/graphoutput".format(host_data_resultDir)) #make plot directory
-    #    docker_opts = "-v {0}:/usr/local/src/myscripts/graphoutput:z ".format(host_data_resultDir)
-    #    docker_cmd = None
-    #    result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
-    # end Jian
-
-    # test Jian
-    client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD'))
-    result_file_path="/data/output_jian_{0}.txt".format(task_id)
-    ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format('input/SPRUCE_pars.txt', 'input/SPRUCE_forcing.txt', 'input/SPRUCE_obs.txt', '/data/output/', '0', 'input/SPRUCE_da_pars.txt')
+    param_filename = create_template(model_name,site_name, 'pars',input_files["pars"],resultDir,check_params, input_files['pars_list'])
+    #Run Model code 
+    client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
+    ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '0', 'input/SPRUCE_da_pars.txt')
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
-    result = str(stdout.read())
+    #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
+#     result = str(stdout.read())
     import pandas as pd
     dates = pd.read_csv('/data/output/Simu_soiltemp.txt')
     data4w = dates.iloc[:,:2]
     data4w.columns = ["ts","xs"]
+    result_file_path=resultDir+'/output/'+"output_jian_{0}.txt".format(task_id)
     data4w.to_csv(result_file_path, index=None)
-
-
-    #Clean up result Directory
-    # clean_up(resultDir)
-    #Create Report
-    # report_data ={'zero_label':'GPP','zero_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'gpp.png'),
-    #             'one_label':'ER','one_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'er.png'),
-    #             'two_label':'Foliage','two_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'foliage.png'),
-    #             'three_label':'Wood','three_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'wood.png'),
-    #             'four_label':'Root','four_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'root.png'),
-    #             'five_label':'Soil','five_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'soil.png')}
-    report_data['title']="SPRUCE Ecological Simulation Task Report"
-    report_data['description']="Simulations of carbon fluxes and pool sizes for SPRUCE experiment based on user defined initial parameters."
-
-    report = create_report('report',report_data,resultDir)
-    result_url ="http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id'])
-    #report_url = "http://{0}/ecopad_tasks/{1}/{2}".format(result['host'],result['task_id'],"report.htm")
-    #{"report":report_url,"data":result_url}
     return result_file_path
+
+
+
+@app.task(bind=True)
+def run_data_assimilation(self, pars):
+    pass
+
+@app.task(bind=True)
+def run_forecast(self, pars):
+    pass
+
+
+# Jian: to check whether the input data is existing.
+def check_files(model, site):
+    """ rule: the basedir of ecopad includes a filepath of "model_infos", which has model_name folder.
+            model_name folder: site_name/ folder and a default_parameters_list.txt.
+            site_name folder has the forcing data and parameters data, named as "siteName_forcing.txt" and "siteName_pars.txt" (and "siteName_da_pars.txt")
+        return 
+    """
+    input_files = {}
+    input_files["pars_list"] = os.path.join(basedir, "model_infos/", "default_parameters_list.txt")
+    input_files["forcing"]   = os.path.join(basedir, "model_infos/", site, site+"_forcing.txt")
+    input_files["pars"]      = os.path.join(basedir, "model_infos/", site, site+"_pars.txt")
+    input_files["da_pars"]   = os.path.join(basedir, "model_infos/", site, site+"_da_pars.txt")
+    for key, f_path in input_files.iterm():
+        if key == "da_pars":
+            if not os.path.exists(f_path): input_files[key] == None
+        else:
+            if not os.path.exists(f_path):
+                print("Error: the file of ", key, "is not existing. The ecopad stoped, and check the file of ", f_path, ". (exit 1)")
+                exit(1)
+    return input_files
+# Jian: end of check_files
+
+def setup_result_directory(task_id):
+    resultDir = os.path.join(basedir, 'ecopad_tasks/', task_id)
+    os.makedirs(resultDir)
+    os.makedirs("{0}/input".format(resultDir))
+    os.makedirs("{0}/output".format(resultDir))
+    os.makedirs("{0}/plot".format(resultDir))
+    return resultDir 
+
+def create_template(model, site, tmpl_name,params,resultDir,check_function, fp_pars_ls): # Jian: put the template to model_name/site_name/templates/tmpl_xxx.tmpl
+    tmpl = os.path.join(basedir, "model_infos", model, 'templates/tmpl_{0}.tmpl'.format(tmpl_name)) # Jian: not os.path.dirname(__file__)
+    with open(tmpl,'r') as f:
+        template=Template(f.read())
+    params_file = os.path.join(resultDir,'{0}.txt'.format(model+"_"+site+"_"+tmpl_name))
+    with open(params_file,'w') as f2:
+        f2.write(template.render(check_function(fp_pars_ls, params)))
+    return '{0}.txt'.format(tmpl_name)
+
+def check_params(filePath_pars_ls, pars):
+    """ Check params and make floats."""
+    dat_ls_pars = open(filePath_pars_ls, "r").read()   # Jian: get the list of pars from model folder
+    ls_pars     = my_file.replace("\n",'').replace("\"",'').split(",") # Jian: parser the list of pars
+    # for param in ["latitude","longitude","wsmax","wsmin","LAIMAX","LAIMIN","SapS","SLA","GLmax","GRmax","Gsmax",
+    #                 "extkU","alpha","Tau_Leaf","Tau_Wood","Tau_Root","Tau_F","Tau_C","Tau_Micro","Tau_SlowSOM",
+    #                 "gddonset","Rl0" ]:
+    for param in ls_pars:
+        try:
+            inside_check(pars,param)
+        except:
+            pass
+        try:
+            inside_check(pars, "min_{0}".format(param))
+        except:
+            pass
+        try:
+            inside_check(pars, "max_{0}".format(param))
+        except:
+            pass
+    return pars 
+
+def inside_check(pars,param):
+   if not "." in str(pars[param]):
+       pars[param]="%s." % (str(pars[param]))
+   else:
+       pars[param]=str(pars[param])  
+
+
+# =====================================================================================================================
+#
+# @app.task(bind=True)
+# def teco_spruce_simulation(self, pars): # ,model_type="0", da_params=None): # Jian: add self to get the task ID
+#     """ Setup task convert parameters from html portal
+#     to file, and store the file in input folder.
+#     call teco_spruce_model.
+#     """
+#     # task_id = str(teco_spruce_simulation.request.id)
+#     task_id = str(self.request.id)
+#     resultDir = setup_result_directory(task_id)
+#     #create param file 
+#     # param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
+#     #Run Spruce TECO code 
+#     host_data_resultDir = "{0}/static/ecopad_tasks/{1}".format(host_data_dir,task_id)
+#     host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)	
+
+#     # Jian: no docker for teco, now using the SSH to local fortran
+#     #    docker_opts = "-v {0}:/data:z -v {1}:/spruce_data:z".format(host_data_resultDir,host_data_dir_spruce_data)
+#     #    docker_cmd = "{0} {1} {2} {3} {4} {5}".format("/data/{0}".format(param_filename),"/spruce_data/SPRUCE_forcing.txt",
+#     #                                    "/spruce_data/SPRUCE_obs.txt",
+#     #                                    "/data", 0 , "/spruce_data/SPRUCE_da_pars.txt")
+#     #    result = docker_task(docker_name="teco_spruce",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+#     #    #Run R Plots
+#     #    #os.makedirs("{0}/graphoutput".format(host_data_resultDir)) #make plot directory
+#     #    docker_opts = "-v {0}:/usr/local/src/myscripts/graphoutput:z ".format(host_data_resultDir)
+#     #    docker_cmd = None
+#     #    result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+#     # end Jian
+
+#     # test Jian
+#     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD'))
+#     result_file_path="/data/output_jian_{0}.txt".format(task_id)
+#     ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format('input/SPRUCE_pars.txt', 'input/SPRUCE_forcing.txt', 'input/SPRUCE_obs.txt', '/data/output/', '0', 'input/SPRUCE_da_pars.txt')
+#     stdin, stdout, stderr = client.exec_command(ssh_cmd)
+#     result = str(stdout.read())
+#     import pandas as pd
+#     dates = pd.read_csv('/data/output/Simu_soiltemp.txt')
+#     data4w = dates.iloc[:,:2]
+#     data4w.columns = ["ts","xs"]
+#     data4w.to_csv(result_file_path, index=None)
+
+
+#     #Clean up result Directory
+#     # clean_up(resultDir)
+#     #Create Report
+#     # report_data ={'zero_label':'GPP','zero_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'gpp.png'),
+#     #             'one_label':'ER','one_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'er.png'),
+#     #             'two_label':'Foliage','two_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'foliage.png'),
+#     #             'three_label':'Wood','three_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'wood.png'),
+#     #             'four_label':'Root','four_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'root.png'),
+#     #             'five_label':'Soil','five_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'soil.png')}
+#     report_data['title']="SPRUCE Ecological Simulation Task Report"
+#     report_data['description']="Simulations of carbon fluxes and pool sizes for SPRUCE experiment based on user defined initial parameters."
+
+#     report = create_report('report',report_data,resultDir)
+#     result_url ="http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id'])
+#     #report_url = "http://{0}/ecopad_tasks/{1}/{2}".format(result['host'],result['task_id'],"report.htm")
+#     #{"report":report_url,"data":result_url}
+#     return result_file_path
 #  
 #@task()
 #def teco_spruce_data_assimilation(pars):
@@ -323,14 +430,14 @@ def teco_spruce_simulation(self, pars): # ,model_type="0", da_params=None): # Ji
 #    except:
 #        pass
 #
-def create_template(tmpl_name,params,resultDir,check_function):
-   tmpl = os.path.join(os.path.dirname(__file__),'templates/{0}.tmpl'.format(tmpl_name))
-   with open(tmpl,'r') as f:
-       template=Template(f.read())
-   params_file = os.path.join(resultDir,'{0}.txt'.format(tmpl_name))
-   with open(params_file,'w') as f2:
-       f2.write(template.render(check_function(params)))
-   return '{0}.txt'.format(tmpl_name)
+# def create_template(tmpl_name,params,resultDir,check_function):
+#    tmpl = os.path.join(os.path.dirname(__file__),'templates/{0}.tmpl'.format(tmpl_name))
+#    with open(tmpl,'r') as f:
+#        template=Template(f.read())
+#    params_file = os.path.join(resultDir,'{0}.txt'.format(tmpl_name))
+#    with open(params_file,'w') as f2:
+#        f2.write(template.render(check_function(params)))
+#    return '{0}.txt'.format(tmpl_name)
 #
 #def create_report(tmpl_name,data,resultDir):
 #    tmpl = os.path.join(os.path.dirname(__file__),'templates/{0}.tmpl'.format(tmpl_name))
@@ -341,32 +448,32 @@ def create_template(tmpl_name,params,resultDir,check_function):
 #        f2.write(template.render(data))
 #    return '{0}.htm'.format(tmpl_name)
 #
-def setup_result_directory(task_id):
-   resultDir = os.path.join(basedir, 'ecopad_tasks/', task_id)
-   os.makedirs(resultDir)
-   os.makedirs("{0}/input".format(resultDir))
-   os.makedirs("{0}/output".format(resultDir))
-   os.makedirs("{0}/plot".format(resultDir))
-   return resultDir 
+# def setup_result_directory(task_id):
+#    resultDir = os.path.join(basedir, 'ecopad_tasks/', task_id)
+#    os.makedirs(resultDir)
+#    os.makedirs("{0}/input".format(resultDir))
+#    os.makedirs("{0}/output".format(resultDir))
+#    os.makedirs("{0}/plot".format(resultDir))
+#    return resultDir 
 #
-def check_params(pars):
-   """ Check params and make floats."""
-   for param in ["latitude","longitude","wsmax","wsmin","LAIMAX","LAIMIN","SapS","SLA","GLmax","GRmax","Gsmax",
-                   "extkU","alpha","Tau_Leaf","Tau_Wood","Tau_Root","Tau_F","Tau_C","Tau_Micro","Tau_SlowSOM",
-                   "gddonset","Rl0" ]:
-       try:
-           inside_check(pars,param)
-       except:
-           pass
-       try:
-           inside_check(pars, "min_{0}".format(param))
-       except:
-           pass
-       try:
-           inside_check(pars, "max_{0}".format(param))
-       except:
-           pass
-   return pars  
+# def check_params(pars):
+#    """ Check params and make floats."""
+#    for param in ["latitude","longitude","wsmax","wsmin","LAIMAX","LAIMIN","SapS","SLA","GLmax","GRmax","Gsmax",
+#                    "extkU","alpha","Tau_Leaf","Tau_Wood","Tau_Root","Tau_F","Tau_C","Tau_Micro","Tau_SlowSOM",
+#                    "gddonset","Rl0" ]:
+#        try:
+#            inside_check(pars,param)
+#        except:
+#            pass
+#        try:
+#            inside_check(pars, "min_{0}".format(param))
+#        except:
+#            pass
+#        try:
+#            inside_check(pars, "max_{0}".format(param))
+#        except:
+#            pass
+#    return pars  
 #
 #def inside_check(pars,param):
 #    if not "." in str(pars[param]):
