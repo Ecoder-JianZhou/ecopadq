@@ -5,7 +5,7 @@ from paramiko import SSHClient, AutoAddPolicy
 # from os import getenv
 import os
 #from subprocess import call,STDOUT
-#from jinja2 import Template
+from jinja2 import Template
 #from shutil import copyfile, move
 #from glob import glob
 # import requests,os  # Jian: no module named 'requests'
