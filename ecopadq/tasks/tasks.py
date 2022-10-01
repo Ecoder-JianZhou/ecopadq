@@ -114,7 +114,7 @@ def run_simulation(self, model_name, site_name):
     data4w.columns = ["ts","xs"]
     result_file_path='/webData/output/'+"output_jian_{0}.txt".format(task_id)
     data4w.to_csv(result_file_path, index=None)
-    return result_file_path
+    return '/data/output/'+"output_jian_{0}.txt".format(task_id)
 
 
 @app.task(bind=True)
