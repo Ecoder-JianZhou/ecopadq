@@ -200,7 +200,7 @@ def inside_check(pars,param):
     
 def readYml2Dict(filePath):
     # Open the file and load the file
-    with open(filepath) as f:
+    with open(filePath) as f:
         data = yaml.load(f, Loader=yaml.loader.SafeLoader)
     return data
 
