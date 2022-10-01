@@ -125,6 +125,10 @@ def run_data_assimilation(self, pars):
 def run_forecast(self, pars):
     pass
 
+@app.task(bind=True)
+def run_pull_data(self):
+    pass
+
 
 # Jian: to check whether the input data is existing.
 def check_files(model, site):
