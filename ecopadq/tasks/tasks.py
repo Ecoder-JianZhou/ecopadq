@@ -166,7 +166,7 @@ def create_template(model, site, tmpl_name,params,resultDir,check_function, fp_p
         obj = check_function(fp_pars_ls, params)
         print(obj)
         f2.write(template.render(check_function(fp_pars_ls, params)))
-    return '{0}.txt'.format(tmpl_name)
+    return params_file#'{0}.txt'.format(tmpl_name)
 
 def check_params(filePath_pars_ls, pars):
     """ Check params and make floats."""
