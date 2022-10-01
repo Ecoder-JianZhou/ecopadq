@@ -4,6 +4,7 @@ import celeryconfig
 from paramiko import SSHClient, AutoAddPolicy
 # from os import getenv
 import os
+import yaml
 #from subprocess import call,STDOUT
 from jinja2 import Template
 #from shutil import copyfile, move
@@ -98,7 +99,8 @@ def run_simulation(self, model_name, site_name):
     input_files = check_files(model_name, site_name)
     resultDir   = setup_result_directory(task_id)
     #create param file 
-    param_filename = create_template(model_name,site_name, 'pars',input_files["pars"],resultDir,check_params, input_files['pars_list'])
+    params = readYml2Dict(input_files["pars"])
+    param_filename = create_template(model_name,site_name, 'pars',params,resultDir,check_params, input_files['pars_list'])
     #Run Model code 
     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
     ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '0', 'input/SPRUCE_da_pars.txt')
@@ -172,7 +174,8 @@ def check_params(filePath_pars_ls, pars):
     # for param in ["latitude","longitude","wsmax","wsmin","LAIMAX","LAIMIN","SapS","SLA","GLmax","GRmax","Gsmax",
     #                 "extkU","alpha","Tau_Leaf","Tau_Wood","Tau_Root","Tau_F","Tau_C","Tau_Micro","Tau_SlowSOM",
     #                 "gddonset","Rl0" ]:
-
+    print("test:", ls_pars)
+    testFile = open(pars, "r").read() 
     for param in ls_pars:
         try:
             inside_check(pars,param)
@@ -194,6 +197,13 @@ def inside_check(pars,param):
        pars[param]="%s." % (str(pars[param]))
    else:
        pars[param]=str(pars[param])  
+    
+def readYml2Dict(filePath):
+    # Open the file and load the file
+    with open(filepath) as f:
+        data = yaml.load(f, Loader=yaml.loader.SafeLoader)
+    return data
+
 
 
 # =====================================================================================================================

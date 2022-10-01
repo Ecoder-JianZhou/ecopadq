@@ -8,6 +8,7 @@ setup(name='ecopadq',
       install_requires=[
         'paramiko',
         'pandas', # zj: test data
+        'pyyaml', # zj:
 #       'dockertask @ git+git://github.com/ou-ecolab/dockertask.git@test#egg=dockertask',
 #       'celery',
 #       'requests',
