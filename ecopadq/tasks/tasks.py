@@ -112,10 +112,9 @@ def run_simulation(self, model_name, site_name):
     dates = pd.read_csv(resultDir+'/output/Simu_soiltemp.txt')
     data4w = dates.iloc[:,:2]
     data4w.columns = ["ts","xs"]
-    result_file_path=resultDir+'/output/'+"output_jian_{0}.txt".format(task_id)
+    result_file_path='/webData/output/'+"output_jian_{0}.txt".format(task_id)
     data4w.to_csv(result_file_path, index=None)
     return result_file_path
-
 
 
 @app.task(bind=True)
