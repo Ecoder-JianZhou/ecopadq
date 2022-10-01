@@ -107,7 +107,7 @@ def run_simulation(self, model_name, site_name):
     print(ssh_cmd)
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
     #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
-#     result = str(stdout.read())
+    result = str(stdout.read())
     import pandas as pd
     dates = pd.read_csv(resultDir+'/output/Simu_soiltemp.txt')
     data4w = dates.iloc[:,:2]
