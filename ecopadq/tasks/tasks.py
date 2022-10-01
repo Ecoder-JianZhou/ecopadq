@@ -118,15 +118,15 @@ def run_simulation(self, model_name, site_name):
 
 
 @app.task(bind=True)
-def run_data_assimilation(self, pars):
+def run_data_assimilation(self, a,b):
     pass
 
 @app.task(bind=True)
-def run_forecast(self, pars):
+def run_forecast(self, a, b):
     pass
 
 @app.task(bind=True)
-def run_pull_data(self):
+def run_pull_data(self, a, b):
     pass
 
 
