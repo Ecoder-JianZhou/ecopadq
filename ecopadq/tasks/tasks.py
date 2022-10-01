@@ -174,8 +174,6 @@ def check_params(filePath_pars_ls, pars):
     # for param in ["latitude","longitude","wsmax","wsmin","LAIMAX","LAIMIN","SapS","SLA","GLmax","GRmax","Gsmax",
     #                 "extkU","alpha","Tau_Leaf","Tau_Wood","Tau_Root","Tau_F","Tau_C","Tau_Micro","Tau_SlowSOM",
     #                 "gddonset","Rl0" ]:
-    print("test:", ls_pars)
-    testFile = open(pars, "r").read() 
     for param in ls_pars:
         try:
             inside_check(pars,param)
