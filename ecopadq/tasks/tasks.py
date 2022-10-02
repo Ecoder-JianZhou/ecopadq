@@ -19,7 +19,7 @@ basedir="/data/ecopad_test"
 # host_data_dir = os.environ["host_data_dir"] 
 ## "/home/ecopad/ecopad/data/static"
 # add by Jian:
-from datatask import teco_spruce_pulldata
+# from datatask import teco_spruce_pulldata
 
 client=SSHClient()
 client.set_missing_host_key_policy(AutoAddPolicy())
@@ -131,7 +131,7 @@ def run_forecast(self, a, b):
 def run_pull_data(self, a, b):
     task_id = str(self.request.id) # Get the task id from portal
     resultDir   = setup_result_directory(task_id)
-    teco_spruce_pulldata(resultDir+'/output/')
+    # teco_spruce_pulldata(resultDir+'/output/')
     return "sucessfull!"
 
 
