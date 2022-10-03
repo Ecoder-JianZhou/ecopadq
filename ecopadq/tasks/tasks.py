@@ -131,7 +131,7 @@ def run_forecast(self, a, b):
 def run_pull_data(self, a, b):
     task_id = str(self.request.id) # Get the task id from portal
     resultDir   = setup_result_directory(task_id)
-    teco_spruce_pulldata(resultDir+'/output/')
+    teco_spruce_pulldata(basedir+'/model_infos/teco_spruce_v2/SPRUCE/pull_forcing_data_SPRUCE')
     return "sucessfull!"
 
 
