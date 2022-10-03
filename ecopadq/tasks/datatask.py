@@ -7,7 +7,7 @@ import sys
 from itertools import groupby
 from operator import itemgetter
 # sys.path.append('/code/task_config')
-from config import ftp_username, ftp_password
+from .config import ftp_username, ftp_password
 
 
 #@task
