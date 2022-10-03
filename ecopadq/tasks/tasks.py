@@ -120,8 +120,40 @@ def run_simulation(self, model_name, site_name):
 
 
 @app.task(bind=True)
-def run_data_assimilation(self, a,b):
-    pass
+def run_data_assimilation(self, model_name, site_name): # def teco_spruce_data_assimilation(pars):
+    """
+        DA TECO Spruce
+        args: pars - Initial parameters for TECO SPRUCE
+        kwargs: da_params - Which DA variable and min and max range for 18 variables
+    """
+    task_id = str(self.request.id)
+    # check the files in input_path: forcing_data.txt; paramater_data.txt;
+    input_files = check_files(model_name, site_name)
+    if input_files['da_pars'] is None:
+        print("The data assimulation parameters of {0} model to run {1} site is invalid. Please check it in folder of {3}".format( model_name, site_name, 
+           os.path.join(basedir, "model_infos/", model, site, site+"_da_pars.txt")))
+        exit(1)
+    resultDir = setup_result_directory(task_id)
+    #parm template file
+    params = readYml2Dict(input_files["pars"])
+    # param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
+    param_filename = create_template(model_name,site_name, 'pars',params,resultDir,check_params, input_files['pars_list'])
+    params = readYml2Dict(input_files["da_pars"])
+    da_param_filename = create_template(model_name,site_name,'da_pars',params,resultDir,check_params, os.path.join(basedir, "model_infos/", model_name, "default_da_parameters_list.txt"))
+    #Run Model code 
+    client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
+    ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '1', 'input/SPRUCE_da_pars.txt')
+    print(ssh_cmd)
+    stdin, stdout, stderr = client.exec_command(ssh_cmd)
+    #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
+    result = str(stdout.read())
+    import pandas as pd
+    dates = pd.read_csv(resultDir+'/output/Simu_dailyflux001.txt')
+    data4w = dates.iloc[:,:2]
+    data4w.columns = ["ts","xs"]
+    result_file_path='/webData/output/'+"output_jian_{0}.txt".format(task_id)
+    data4w.to_csv(result_file_path, index=None)
+    return '/data/output/'+"output_jian_{0}.txt".format(task_id)
 
 @app.task(bind=True)
 def run_forecast(self, a, b):
@@ -187,7 +219,7 @@ def check_params(filePath_pars_ls, pars):
         try:
             inside_check(pars,param)
         except Exception as e:
-            print("ettttt:", e)
+            # print("ettttt:", e)
             pass
         try:
             inside_check(pars, "min_{0}".format(param))
