@@ -92,7 +92,7 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
     dates = pd.read_csv(resultDir+'/output/Simu_dailyflux14001.txt')
     dates.columns = ["sdoy", "GPP", "NEE", "Reco", "NPP", "Ra", "QC1", "QC2", "QC3", "QC4", "QC5", "QC6", "QC7", "QC8", "Rh"]
     result_file_path='/webData/show_forecast_results/'+"lastest_forecast_results_380ppm_0degree.txt" # Jian: the path in TECO docker that links to "/web/data"
-    data4w.to_csv(result_file_path, index=None) 
+    dates.to_csv(result_file_path, index=None) 
     
 
 
