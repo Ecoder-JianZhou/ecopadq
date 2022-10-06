@@ -46,13 +46,14 @@ def run_simulation(self, model_name, site_name):
     '''
     task_id = str(self.request.id) # Get the task id from portal
     # check the files in input_path: forcing_data.txt; paramater_data.txt;
-    input_files = check_files(model_name, site_name) # dict
+    input_files = check_files(model_name, site_name) # dict: def_ls_pars; def_ls_da_pars; tmpl_da_pars; tmpl_pars; forcing; da_pars; pars.
     resultDir   = setup_result_directory(task_id)
-    #create param file 
+    # create param file 
     params         = readYml2Dict(input_files["pars"])
-    param_filename = create_template(model_name,site_name, 'pars',params,resultDir,check_params, input_files['pars_list'])
-    #Run Model code 
+    param_filename = create_template(input_files['tmpl_pars'], 'pars',params,resultDir+"/input",check_params, input_files['pars_list'])
+    # Run Model code 
     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
+    # Jian: change the argments in TECO to parameters, forcing data, resultDir, mode, da_pars, obs_file, 
     ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '0', 'input/SPRUCE_da_pars.txt')
     print(ssh_cmd)
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
@@ -62,130 +63,130 @@ def run_simulation(self, model_name, site_name):
     dates = pd.read_csv(resultDir+'/output/Simu_soiltemp.txt')
     data4w = dates.iloc[:,:2]
     data4w.columns = ["ts","xs"]
-    result_file_path='/webData/output/'+"output_jian_{0}.txt".format(task_id)
-    data4w.to_csv(result_file_path, index=None)
-    return '/data/output/'+"output_jian_{0}.txt".format(task_id)
+    result_file_path='/webData/output/'+"output_test_{0}.txt".format(task_id) # Jian: the path in TECO docker that links to "/web/data"
+    data4w.to_csv(result_file_path, index=None) 
+    return '/data/output/'+"output_test_{0}.txt".format(task_id) # Jian: the path of /web/data in website
 
 
-@app.task(bind=True)
-def run_data_assimilation(self, model_name, site_name): # def teco_spruce_data_assimilation(pars):
-    """
-        DA TECO Spruce
-        args: pars - Initial parameters for TECO SPRUCE
-        kwargs: da_params - Which DA variable and min and max range for 18 variables
-    """
-    task_id = str(self.request.id)
-    # check the files in input_path: forcing_data.txt; paramater_data.txt;
-    input_files = check_files(model_name, site_name)
-    if input_files['da_pars'] is None:
-        print("The data assimulation parameters of {0} model to run {1} site is invalid. Please check it in folder of {3}".format( model_name, site_name, 
-           os.path.join(basedir, "model_infos/", model, site, site+"_da_pars.txt")))
-        exit(1)
-    resultDir = setup_result_directory(task_id)
-    #parm template file
-    params = readYml2Dict(input_files["pars"])
-    # param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
-    param_filename = create_template(model_name,site_name, 'pars',params,resultDir,check_params, input_files['pars_list'])
-    params = readYml2Dict(input_files["da_pars"])
-    da_param_filename = create_template(model_name,site_name,'da_pars',params,resultDir,check_params, os.path.join(basedir, "model_infos/", model_name, "default_da_parameters_list.txt"))
-    #Run Model code 
-    client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
-    ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '1', 'input/SPRUCE_da_pars.txt')
-    print(ssh_cmd)
-    stdin, stdout, stderr = client.exec_command(ssh_cmd)
-    #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
-    result = str(stdout.read())
-    import pandas as pd
-    dates = pd.read_csv(resultDir+'/output/Simu_dailyflux001.txt')
-    data4w = dates.iloc[:,:2]
-    data4w.columns = ["ts","xs"]
-    result_file_path='/webData/output/'+"output_jian_{0}.txt".format(task_id)
-    data4w.to_csv(result_file_path, index=None)
-    return '/data/output/'+"output_jian_{0}.txt".format(task_id)
+# @app.task(bind=True)
+# def run_data_assimilation(self, model_name, site_name): # def teco_spruce_data_assimilation(pars):
+#     """
+#         DA TECO Spruce
+#         args: pars - Initial parameters for TECO SPRUCE
+#         kwargs: da_params - Which DA variable and min and max range for 18 variables
+#     """
+#     task_id = str(self.request.id)
+#     # check the files in input_path: forcing_data.txt; paramater_data.txt;
+#     input_files = check_files(model_name, site_name)
+#     if input_files['da_pars'] is None:
+#         print("The data assimulation parameters of {0} model to run {1} site is invalid. Please check it in folder of {3}".format( model_name, site_name, 
+#            os.path.join(basedir, "model_infos/", model, site, site+"_da_pars.txt")))
+#         exit(1)
+#     resultDir = setup_result_directory(task_id)
+#     #parm template file
+#     params = readYml2Dict(input_files["pars"])
+#     # param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)
+#     param_filename = create_template(model_name,site_name, 'pars',params,resultDir,check_params, input_files['pars_list'])
+#     params = readYml2Dict(input_files["da_pars"])
+#     da_param_filename = create_template(model_name,site_name,'da_pars',params,resultDir,check_params, os.path.join(basedir, "model_infos/", model_name, "default_da_parameters_list.txt"))
+#     #Run Model code 
+#     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
+#     ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '1', 'input/SPRUCE_da_pars.txt')
+#     print(ssh_cmd)
+#     stdin, stdout, stderr = client.exec_command(ssh_cmd)
+#     #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
+#     result = str(stdout.read())
+#     import pandas as pd
+#     dates = pd.read_csv(resultDir+'/output/Simu_dailyflux001.txt')
+#     data4w = dates.iloc[:,:2]
+#     data4w.columns = ["ts","xs"]
+#     result_file_path='/webData/output/'+"output_jian_{0}.txt".format(task_id)
+#     data4w.to_csv(result_file_path, index=None)
+#     return '/data/output/'+"output_jian_{0}.txt".format(task_id)
 
-@app.task(bind=True)
-def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,forecast_year,forecast_day,temperature_treatment=0.0,co2_treatment=380.0,da_task_id=None,public=None):
-    """
-        --Jian Zhou. Oct. 05 2022
-        Forecasting: initial version to 
-        args: model_name, site_name. 
-    """
-    task_id = str(teco_spruce_forecast.request.id)
-    resultDir = setup_result_directory(task_id)
-    param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)  # Jian: get parameter to run simulation
-    #da_param_filename = create_template('SPRUCE_da_pars',pars,resultDir,check_params)
-    da_param_filename ="SPRUCE_da_pars.txt"                                      # Jian: get range of parameters to run data assimilation
-    host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)
-    #Set Param estimation file from DA 
-    if not da_task_id:
-        try:
-            copyfile("{0}/Paraest.txt".format(spruce_data_folder),"{0}/Paraest.txt".format(resultDir))
-            copyfile("{0}/SPRUCE_da_pars.txt".format(spruce_data_folder),"{0}/SPRUCE_da_pars.txt".format(resultDir))
-        except:
-            error_file = "{0}/Paraest.txt or SPRUCE_da_pars.txt".format(spruce_data_folder)
-            raise Exception("Parameter Estimation file location problem. {0} file not found.".format(error_file))
-    else:
-        try:
-            copyfile("{0}/ecopad_tasks/{1}/input/Paraest.txt".format(basedir,da_task_id),"{0}/Paraest.txt".format(resultDir))
-            copyfile("{0}/ecopad_tasks/{1}/input/SPRUCE_da_pars.txt".format(basedir,da_task_id),"{0}/SPRUCE_da_pars.txt".format(resultDir))
-        except:
-            error_file = "{0}/ecopad_tasks/{1}/input/Paraest.txt or SPRUCE_da_pars.txt".format(basedir,da_task_id)
-            raise Exception("Parameter Estimation file location problem. {0} file not found.".format(error_file))
-    #Run Spruce TECO code
-    host_data_resultDir = "{0}/static/ecopad_tasks/{1}".format(host_data_dir,task_id)
-    host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)
-    docker_opts = "-v {0}:/data:z -v {1}:/spruce_data".format(host_data_resultDir,host_data_dir_spruce_data)
-    docker_cmd = "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}".format("/data/{0}".format(param_filename),
-                                    "/spruce_data/SPRUCE_forcing.txt", "/spruce_data/SPRUCE_obs.txt",
-                                    "/data",2, "/data/{0}".format(da_param_filename),
-                                    "/spruce_data/Weathergenerate",forecast_year, forecast_day,
-                                    temperature_treatment,co2_treatment)
-    result = docker_task(docker_name="teco_spruce",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
-    #Run R Plots
-    docker_opts = "-v {0}:/data:z ".format(host_data_resultDir)
-    docker_cmd ="Rscript ECOPAD_forecast_viz.R {0} {1} {2} {3}".format("obs_file/SPRUCE_obs.txt","/data","/data",100)
-    result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+# @app.task(bind=True)
+# def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,forecast_year,forecast_day,temperature_treatment=0.0,co2_treatment=380.0,da_task_id=None,public=None):
+#     """
+#         --Jian Zhou. Oct. 05 2022
+#         Forecasting: initial version to 
+#         args: model_name, site_name. 
+#     """
+#     task_id = str(teco_spruce_forecast.request.id)
+#     resultDir = setup_result_directory(task_id)
+#     param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)  # Jian: get parameter to run simulation
+#     #da_param_filename = create_template('SPRUCE_da_pars',pars,resultDir,check_params)
+#     da_param_filename ="SPRUCE_da_pars.txt"                                      # Jian: get range of parameters to run data assimilation
+#     host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)
+#     #Set Param estimation file from DA 
+#     if not da_task_id:
+#         try:
+#             copyfile("{0}/Paraest.txt".format(spruce_data_folder),"{0}/Paraest.txt".format(resultDir))
+#             copyfile("{0}/SPRUCE_da_pars.txt".format(spruce_data_folder),"{0}/SPRUCE_da_pars.txt".format(resultDir))
+#         except:
+#             error_file = "{0}/Paraest.txt or SPRUCE_da_pars.txt".format(spruce_data_folder)
+#             raise Exception("Parameter Estimation file location problem. {0} file not found.".format(error_file))
+#     else:
+#         try:
+#             copyfile("{0}/ecopad_tasks/{1}/input/Paraest.txt".format(basedir,da_task_id),"{0}/Paraest.txt".format(resultDir))
+#             copyfile("{0}/ecopad_tasks/{1}/input/SPRUCE_da_pars.txt".format(basedir,da_task_id),"{0}/SPRUCE_da_pars.txt".format(resultDir))
+#         except:
+#             error_file = "{0}/ecopad_tasks/{1}/input/Paraest.txt or SPRUCE_da_pars.txt".format(basedir,da_task_id)
+#             raise Exception("Parameter Estimation file location problem. {0} file not found.".format(error_file))
+#     #Run Spruce TECO code
+#     host_data_resultDir = "{0}/static/ecopad_tasks/{1}".format(host_data_dir,task_id)
+#     host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)
+#     docker_opts = "-v {0}:/data:z -v {1}:/spruce_data".format(host_data_resultDir,host_data_dir_spruce_data)
+#     docker_cmd = "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}".format("/data/{0}".format(param_filename),
+#                                     "/spruce_data/SPRUCE_forcing.txt", "/spruce_data/SPRUCE_obs.txt",
+#                                     "/data",2, "/data/{0}".format(da_param_filename),
+#                                     "/spruce_data/Weathergenerate",forecast_year, forecast_day,
+#                                     temperature_treatment,co2_treatment)
+#     result = docker_task(docker_name="teco_spruce",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+#     #Run R Plots
+#     docker_opts = "-v {0}:/data:z ".format(host_data_resultDir)
+#     docker_cmd ="Rscript ECOPAD_forecast_viz.R {0} {1} {2} {3}".format("obs_file/SPRUCE_obs.txt","/data","/data",100)
+#     result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
 
-    # Yuanyuan add to reformat output data
-    docker_opts = "-v {0}:/data:z ".format(host_data_resultDir)
-    docker_cmd = "Rscript reformat_to_csv.R {0} {1} {2} {3} {4}".format("/data","/data",100,temperature_treatment,co2_treatment)
-    #docker_opts = "-v {0}:/data:z ".format(host_data_resultDir)
-    #docker_cmd = "Rscript reformat_to_csv_backup.R {0} {1} {2}".format("/data","/data",100)
-    # docker_opts = None
-    # docker_cmd = None
-    result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+#     # Yuanyuan add to reformat output data
+#     docker_opts = "-v {0}:/data:z ".format(host_data_resultDir)
+#     docker_cmd = "Rscript reformat_to_csv.R {0} {1} {2} {3} {4}".format("/data","/data",100,temperature_treatment,co2_treatment)
+#     #docker_opts = "-v {0}:/data:z ".format(host_data_resultDir)
+#     #docker_cmd = "Rscript reformat_to_csv_backup.R {0} {1} {2}".format("/data","/data",100)
+#     # docker_opts = None
+#     # docker_cmd = None
+#     result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
 
-    #Clean up result Directory
-    clean_up(resultDir)
-    #Create Report
-    report_data ={'zero_label':'GPP Forecast','zero_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'gpp_forecast.png'),
-                'one_label':'ER Forecast','one_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'er_forecast.png'),
-                'two_label':'Foliage Forecast','two_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'foliage_forecast.png'),
-                'three_label':'Wood Forecast','three_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'wood_forecast.png'),
-                'four_label':'Root Forecast','four_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'root_forecast.png'),
-                'five_label':'Soil Forecast','five_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'soil_forecast.png')}
-    report_data['title']="SPRUCE Ecological Forecast Task Report"
-    desc = "Use constrained parameters from Data Assimilation to predict carbon fluxes and pool sizes. "
-    desc = desc + "Forcing inputs are genereated by auto-regression model using historical climate data of the SPRUCE site. "
-    desc = desc + "Allow users to choose which year and day to make predictations of ecosystem in response to treatment effects."
-    report_data['description']=desc
-    report_name = create_report('report',report_data,resultDir)
-    #return {"data":"http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id']),
-    #        "report": "http://{0}/ecopad_tasks/{1}/{2}".format(result['host'],result['task_id'],report_name)}
-    result_url = "http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id'])
-    if public:
-        data={'tag':public,'result_url':result_url,'task_id':task_id,'timestamp':datetime.now()}
-        db=MongoClient('ecopad_mongo',27017)
-        db.forecast.public.save(data)
+#     #Clean up result Directory
+#     clean_up(resultDir)
+#     #Create Report
+#     report_data ={'zero_label':'GPP Forecast','zero_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'gpp_forecast.png'),
+#                 'one_label':'ER Forecast','one_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'er_forecast.png'),
+#                 'two_label':'Foliage Forecast','two_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'foliage_forecast.png'),
+#                 'three_label':'Wood Forecast','three_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'wood_forecast.png'),
+#                 'four_label':'Root Forecast','four_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'root_forecast.png'),
+#                 'five_label':'Soil Forecast','five_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'soil_forecast.png')}
+#     report_data['title']="SPRUCE Ecological Forecast Task Report"
+#     desc = "Use constrained parameters from Data Assimilation to predict carbon fluxes and pool sizes. "
+#     desc = desc + "Forcing inputs are genereated by auto-regression model using historical climate data of the SPRUCE site. "
+#     desc = desc + "Allow users to choose which year and day to make predictations of ecosystem in response to treatment effects."
+#     report_data['description']=desc
+#     report_name = create_report('report',report_data,resultDir)
+#     #return {"data":"http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id']),
+#     #        "report": "http://{0}/ecopad_tasks/{1}/{2}".format(result['host'],result['task_id'],report_name)}
+#     result_url = "http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id'])
+#     if public:
+#         data={'tag':public,'result_url':result_url,'task_id':task_id,'timestamp':datetime.now()}
+#         db=MongoClient('ecopad_mongo',27017)
+#         db.forecast.public.save(data)
 
-    return result_url
+#     return result_url
 
-@app.task(bind=True)
-def run_pull_data(self, a, b):
-    task_id = str(self.request.id) # Get the task id from portal
-    resultDir   = setup_result_directory(task_id)
-    teco_spruce_pulldata(basedir+'/model_infos/teco_spruce_v2/SPRUCE/pull_forcing_data_SPRUCE')
-    return "sucessfull!"
+# @app.task(bind=True)
+# def run_pull_data(self, a, b):
+#     task_id = str(self.request.id) # Get the task id from portal
+#     resultDir   = setup_result_directory(task_id)
+#     teco_spruce_pulldata(basedir+'/model_infos/teco_spruce_v2/SPRUCE/pull_forcing_data_SPRUCE')
+#     return "sucessfull!"
 
 
 # Jian: to check whether the input data is existing.
@@ -234,11 +235,11 @@ def setup_result_directory(task_id):
     os.makedirs("{0}/plot".format(resultDir))
     return resultDir 
 
-def create_template(model, site, tmpl_name,params,resultDir,check_function, fp_pars_ls): # Jian: put the template to model_name/site_name/templates/tmpl_xxx.tmpl
-    tmpl = os.path.join(basedir, "model_infos", model, 'templates/tmpl_{0}.tmpl'.format(tmpl_name)) # Jian: not os.path.dirname(__file__)
+def create_template(tmpl, tmpl_name,params,resultDir,check_function, fp_pars_ls): # Jian: put the template to model_name/site_name/templates/tmpl_xxx.tmpl
+    # tmpl = os.path.join(basedir, "model_infos", model, 'templates/tmpl_{0}.tmpl'.format(tmpl_name)) # Jian: not os.path.dirname(__file__)
     with open(tmpl,'r') as f:
         template=Template(f.read())
-    params_file = os.path.join(resultDir,'{0}.txt'.format(model+"_"+site+"_"+tmpl_name))
+    params_file = os.path.join(resultDir,"input",'{0}.txt'.format(tmpl_name))
     with open(params_file,'w') as f2:
         obj = check_function(fp_pars_ls, params)
         print(obj)
