@@ -50,7 +50,7 @@ def run_simulation(self, model_name, site_name):
     resultDir   = setup_result_directory(task_id)
     # create param file 
     params         = readYml2Dict(input_files["pars"])
-    param_filename = create_template(input_files['tmpl_pars'], 'pars',params,resultDir+"/input",check_params, input_files['pars_list'])
+    param_filename = create_template(input_files['tmpl_pars'], 'pars',params,resultDir+"/input",check_params, input_files['def_ls_pars'])
     # Run Model code 
     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
     # Jian: change the argments in TECO to parameters, forcing data, resultDir, mode, da_pars, obs_file, 
