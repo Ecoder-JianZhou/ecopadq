@@ -110,7 +110,7 @@ def teco_spruce_pulldata(destination='./spruce_data'):
         rain=group_treat['Rain'].sum()
         ws=group_treat['WS'].mean()
         par=group_treat['PAR'].mean()
-        print("JJJ")
+
         #Taking only the even coulums(as half hourly details not required) i.e. 12:30 not required only 12 required 
         teco_spruce1=teco_spruce.iloc[::2]
         #need to reset the index number[from 0 2 4 8] [to 0 1 2 3]
@@ -123,7 +123,10 @@ def teco_spruce_pulldata(destination='./spruce_data'):
         teco_spruce1['Rain']=rain.reset_index(drop=True)
         teco_spruce1['WS']=ws.reset_index(drop=True)
         teco_spruce1['PAR']=par.reset_index(drop=True)
-        print(teco_spruce1)
+        # Jian: save the pulled data 
+        time_now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        teco_spruce1.to_csv('{0}/SPRUCE_forcing_{1}.txt'.format(destination, time_now),'\t',index=False)
+
         #file which contain earlier data(2011-2015)
         j1=pd.read_csv(initial_text,'\t')
 

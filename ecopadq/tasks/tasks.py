@@ -93,6 +93,17 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
     dates.columns = ["sdoy", "GPP", "NEE", "ER", "NPP", "Ra", "QC1", "QC2", "QC3", "QC4", "QC5", "QC6", "QC7", "QC8", "Rh"]
     result_file_path='/webData/show_forecast_results/'+"lastest_forecast_results_380ppm_0degree.txt" # Jian: the path in TECO docker that links to "/web/data"
     dates.to_csv(result_file_path, index=None) 
+
+@app.task(bind=True)
+def run_pull_data(self, model_name, site_name):
+    '''
+        pull forcing data from website, for example, SPRUCE
+
+    '''
+    task_id     = str(self.request.id) # Get the task id from portal
+    resultDir   = setup_result_directory(task_id)
+    teco_spruce_pulldata(os.path.join(basedir,'sites_data', site_name, 'forcing_data' ,'pull_forcing_data_SPRUCE'))
+    return "sucessfull!"
     
 
 
