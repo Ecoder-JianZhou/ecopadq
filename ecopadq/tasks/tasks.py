@@ -7,7 +7,7 @@ import os
 import yaml
 #from subprocess import call,STDOUT
 from jinja2 import Template
-#from shutil import copyfile, move
+from shutil import copyfile, move
 #from glob import glob
 # import requests,os  # Jian: no module named 'requests'
 #from pymongo import MongoClient
@@ -103,6 +103,7 @@ def run_pull_data(self, model_name, site_name):
     task_id     = str(self.request.id) # Get the task id from portal
     resultDir   = setup_result_directory(task_id)
     teco_spruce_pulldata(os.path.join(basedir,'sites_data', site_name, 'forcing_data' ,'pull_forcing_data'))
+    copyfile(os.path.join(basedir,'sites_data', site_name, 'forcing_data' ,'pull_forcing_data',"SPRUCE_forcing.txt"), os.path.join(basedir,'sites_data', site_name, 'forcing_data' ,"SPRUCE_forcing.txt"))
     return "sucessfull!"
     
 
