@@ -215,8 +215,8 @@ def check_files(model, site):
     input_files["tmpl_pars"]      = os.path.join(basedir, "models_configs", model, "templates", "tmpl_pars.tmpl")
 
     input_files["forcing"]        = os.path.join(basedir, "sites_data", site, "forcing_data", site+"_forcing.txt")
-    input_files["da_pars"]        = os.path.join(basedir, "sites_data", site, "parameters",   site+"_pars.yml")
-    input_files["pars"]           = os.path.join(basedir, "sites_data", site, "parameters",   site+"_da_pars.yml")
+    input_files["da_pars"]        = os.path.join(basedir, "sites_data", site, "parameters",   site+"_da_pars.yml")
+    input_files["pars"]           = os.path.join(basedir, "sites_data", site, "parameters",   site+"_pars.yml")
 
     for key, f_path in input_files.items():
         if key == "da_pars" or key == "def_ls_da_pars" or key == "tmpl_da_pars":
