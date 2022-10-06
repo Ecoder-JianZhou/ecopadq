@@ -238,6 +238,7 @@ def setup_result_directory(task_id):
 
 def create_template(tmpl, tmpl_name,params,resultDir,check_function, fp_pars_ls): # Jian: put the template to model_name/site_name/templates/tmpl_xxx.tmpl
     # tmpl = os.path.join(basedir, "model_infos", model, 'templates/tmpl_{0}.tmpl'.format(tmpl_name)) # Jian: not os.path.dirname(__file__)
+    print("test_tmpl:", tmpl)
     with open(tmpl,'r') as f:
         template=Template(f.read())
     params_file = os.path.join(resultDir,'{0}.txt'.format(tmpl_name))
