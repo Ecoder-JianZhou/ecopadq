@@ -28,67 +28,15 @@ client.load_system_host_keys()
 app = Celery()
 app.config_from_object(celeryconfig)
 ##New Example task
-@app.task()
-def add(a, b):
-    """ Example task that add two numbers or strings
-        args: x and y
-        return substraction of strings
-    """
-    result1 = a + b
-    return result1
+# @app.task()
+# def add(a, b):
+#     """ Example task that add two numbers or strings
+#         args: x and y
+#         return substraction of strings
+#     """
+#     result1 = a + b
+#     return result1
 
-@app.task(bind=True)
-def test(self, input_a, input_b):
-    # This is a prototype for the new interface
-    # The old implementation uses dockertask which is now deprecated
-    # The new implementation uses ssh (via the paramiko lib)
-    # This requires the sshd demom to be started on the container we are connecting
-    # The username and  passwords are shared via environ variables which are also used
-    # to initialize the containers
-    # Similar to the old implementation we share file paths instead of the actual data
-    # This is the reason why this function returns a result_file_path. 
-    # In this case this is the location of text file written by the fortran container.
-    # The javascript code of the frontend can see the return value of this function by querying the api.
-    # and so can find the loacation of the actual file. (In many of the old examples this is an image)
-    # The javascript code of the frontend (running in the browser of an ecopad user on a different machine) 
-    # then makes an request to the 
-    # webserver which can serve the file since the path points to a location under the 
-    # webroot directory.
-    task_id = str(self.request.id)
-    
-    client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD'))
-    result_file_path="/data/output_{0}.txt".format(task_id)
-    # ssh_cmd = "./test {0} {1} {2}".format(input_a, input_b, result_file_path)
-    ssh_cmd = "cp {0} {1}".format("/data/test.txt", result_file_path)
-    stdin, stdout, stderr = client.exec_command(ssh_cmd)
-    result = str(stdout.read())
-    return result_file_path
-
-@app.task(bind=True)
-def jian(self, input_a, input_b):
-    task_id = str(self.request.id)
-    client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD'))
-    result_file_path="/data/output_jian_{0}.txt".format(task_id)
-    ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format('input/SPRUCE_pars.txt', 'input/SPRUCE_forcing.txt', 'input/SPRUCE_obs.txt', '/data/output/', '0', 'input/SPRUCE_da_pars.txt')
-    stdin, stdout, stderr = client.exec_command(ssh_cmd)
-    result = str(stdout.read())
-    import pandas as pd
-    dates = pd.read_csv('/data/output/Simu_soiltemp.txt')
-    data4w = dates.iloc[:,:2]
-    data4w.columns = ["ts","xs"]
-    data4w.to_csv(result_file_path, index=None)
-    # result_file_path=""
-    return result_file_path
-
-# changed by Jian: 
-#   Ecopad includes the functions:
-#       1. choose model, forcing data, parameter files.
-#           input values: "model_name" represents the model name and related files (list of params)
-#           site value: paramters file, forcing data file.
-#       2. functions:
-#           run_simulation;
-#           run_data_assimilation;
-#           run_forecast;
 
 @app.task(bind=True)
 def run_simulation(self, model_name, site_name):
@@ -98,10 +46,10 @@ def run_simulation(self, model_name, site_name):
     '''
     task_id = str(self.request.id) # Get the task id from portal
     # check the files in input_path: forcing_data.txt; paramater_data.txt;
-    input_files = check_files(model_name, site_name)
+    input_files = check_files(model_name, site_name) # dict
     resultDir   = setup_result_directory(task_id)
     #create param file 
-    params = readYml2Dict(input_files["pars"])
+    params         = readYml2Dict(input_files["pars"])
     param_filename = create_template(model_name,site_name, 'pars',params,resultDir,check_params, input_files['pars_list'])
     #Run Model code 
     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
@@ -156,8 +104,81 @@ def run_data_assimilation(self, model_name, site_name): # def teco_spruce_data_a
     return '/data/output/'+"output_jian_{0}.txt".format(task_id)
 
 @app.task(bind=True)
-def run_forecast(self, a, b):
-    pass
+def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,forecast_year,forecast_day,temperature_treatment=0.0,co2_treatment=380.0,da_task_id=None,public=None):
+    """
+        --Jian Zhou. Oct. 05 2022
+        Forecasting: initial version to 
+        args: model_name, site_name. 
+    """
+    task_id = str(teco_spruce_forecast.request.id)
+    resultDir = setup_result_directory(task_id)
+    param_filename = create_template('SPRUCE_pars',pars,resultDir,check_params)  # Jian: get parameter to run simulation
+    #da_param_filename = create_template('SPRUCE_da_pars',pars,resultDir,check_params)
+    da_param_filename ="SPRUCE_da_pars.txt"                                      # Jian: get range of parameters to run data assimilation
+    host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)
+    #Set Param estimation file from DA 
+    if not da_task_id:
+        try:
+            copyfile("{0}/Paraest.txt".format(spruce_data_folder),"{0}/Paraest.txt".format(resultDir))
+            copyfile("{0}/SPRUCE_da_pars.txt".format(spruce_data_folder),"{0}/SPRUCE_da_pars.txt".format(resultDir))
+        except:
+            error_file = "{0}/Paraest.txt or SPRUCE_da_pars.txt".format(spruce_data_folder)
+            raise Exception("Parameter Estimation file location problem. {0} file not found.".format(error_file))
+    else:
+        try:
+            copyfile("{0}/ecopad_tasks/{1}/input/Paraest.txt".format(basedir,da_task_id),"{0}/Paraest.txt".format(resultDir))
+            copyfile("{0}/ecopad_tasks/{1}/input/SPRUCE_da_pars.txt".format(basedir,da_task_id),"{0}/SPRUCE_da_pars.txt".format(resultDir))
+        except:
+            error_file = "{0}/ecopad_tasks/{1}/input/Paraest.txt or SPRUCE_da_pars.txt".format(basedir,da_task_id)
+            raise Exception("Parameter Estimation file location problem. {0} file not found.".format(error_file))
+    #Run Spruce TECO code
+    host_data_resultDir = "{0}/static/ecopad_tasks/{1}".format(host_data_dir,task_id)
+    host_data_dir_spruce_data="{0}/local/spruce_data".format(host_data_dir)
+    docker_opts = "-v {0}:/data:z -v {1}:/spruce_data".format(host_data_resultDir,host_data_dir_spruce_data)
+    docker_cmd = "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}".format("/data/{0}".format(param_filename),
+                                    "/spruce_data/SPRUCE_forcing.txt", "/spruce_data/SPRUCE_obs.txt",
+                                    "/data",2, "/data/{0}".format(da_param_filename),
+                                    "/spruce_data/Weathergenerate",forecast_year, forecast_day,
+                                    temperature_treatment,co2_treatment)
+    result = docker_task(docker_name="teco_spruce",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+    #Run R Plots
+    docker_opts = "-v {0}:/data:z ".format(host_data_resultDir)
+    docker_cmd ="Rscript ECOPAD_forecast_viz.R {0} {1} {2} {3}".format("obs_file/SPRUCE_obs.txt","/data","/data",100)
+    result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+
+    # Yuanyuan add to reformat output data
+    docker_opts = "-v {0}:/data:z ".format(host_data_resultDir)
+    docker_cmd = "Rscript reformat_to_csv.R {0} {1} {2} {3} {4}".format("/data","/data",100,temperature_treatment,co2_treatment)
+    #docker_opts = "-v {0}:/data:z ".format(host_data_resultDir)
+    #docker_cmd = "Rscript reformat_to_csv_backup.R {0} {1} {2}".format("/data","/data",100)
+    # docker_opts = None
+    # docker_cmd = None
+    result = docker_task(docker_name="ecopad_r",docker_opts=docker_opts,docker_command=docker_cmd,id=task_id)
+
+    #Clean up result Directory
+    clean_up(resultDir)
+    #Create Report
+    report_data ={'zero_label':'GPP Forecast','zero_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'gpp_forecast.png'),
+                'one_label':'ER Forecast','one_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'er_forecast.png'),
+                'two_label':'Foliage Forecast','two_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'foliage_forecast.png'),
+                'three_label':'Wood Forecast','three_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'wood_forecast.png'),
+                'four_label':'Root Forecast','four_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'root_forecast.png'),
+                'five_label':'Soil Forecast','five_url':'/ecopad_tasks/{0}/plot/{1}'.format(task_id,'soil_forecast.png')}
+    report_data['title']="SPRUCE Ecological Forecast Task Report"
+    desc = "Use constrained parameters from Data Assimilation to predict carbon fluxes and pool sizes. "
+    desc = desc + "Forcing inputs are genereated by auto-regression model using historical climate data of the SPRUCE site. "
+    desc = desc + "Allow users to choose which year and day to make predictations of ecosystem in response to treatment effects."
+    report_data['description']=desc
+    report_name = create_report('report',report_data,resultDir)
+    #return {"data":"http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id']),
+    #        "report": "http://{0}/ecopad_tasks/{1}/{2}".format(result['host'],result['task_id'],report_name)}
+    result_url = "http://{0}/ecopad_tasks/{1}".format(result['host'],result['task_id'])
+    if public:
+        data={'tag':public,'result_url':result_url,'task_id':task_id,'timestamp':datetime.now()}
+        db=MongoClient('ecopad_mongo',27017)
+        db.forecast.public.save(data)
+
+    return result_url
 
 @app.task(bind=True)
 def run_pull_data(self, a, b):
@@ -169,19 +190,34 @@ def run_pull_data(self, a, b):
 
 # Jian: to check whether the input data is existing.
 def check_files(model, site):
-    """ rule: the basedir of ecopad includes a filepath of "model_infos", which has model_name folder.
-            model_name folder: site_name/ folder and a default_parameters_list.txt.
+    """ rule: the basedir of ecopad includes the folds of "models_configs" and "sites_data".
+            check: 1. models_configs/model; 2. sites_data/site; 
+                   3. models_configs/model/default_da_parameters_list.txt;      4. models_configs/model/default_parameters_list.txt;
+                   5. models_configs/model/templates/tmpl_da_pars.tmpl          6. models_configs/model/templates/tmpl_pars.tmpl
+                   7. sites_data/siteName/forcing_data/siteName_forcing.txt 
+                   8. sites_data/siteName/parameters/siteName_pars.yml
+                   9. sites_data/siteName/parameters/siteName_da_pars.yml
             site_name folder has the forcing data and parameters data, named as "siteName_forcing.txt" and "siteName_pars.txt" (and "siteName_da_pars.txt")
         return 
     """
+    for ipath in ["models_configs/"+model, "sites_data/"+site]:
+        check_path = os.path.join(basedir,ipath)
+        if not os.path.exists(check_path): 
+            print("Error: the file of ", check_path, "is not existing. The ecopad stoped, and check it. (exit 1)") # Jian: maybe put it into log file?
+            exit(1)
+    # read the pre-set input information:
     input_files = {}
-    input_files["pars_list"] = os.path.join(basedir, "model_infos/", model, "default_parameters_list.txt")
-    input_files["forcing"]   = os.path.join(basedir, "model_infos/", model, site, site+"_forcing.txt")
-    input_files["pars"]      = os.path.join(basedir, "model_infos/", model, site, site+"_pars.yml")
-    # input_files["da_pars"]   = os.path.join(basedir, "model_infos/", model, site, site+"_da_pars.txt")
-    input_files["da_pars"]   = os.path.join(basedir, "model_infos/", model, site, site+"_da_pars.yml")
+    input_files["def_ls_pars"]    = os.path.join(basedir, "models_configs", model, "default_parameters_list.txt")
+    input_files["def_ls_da_pars"] = os.path.join(basedir, "models_configs", model, "default_da_parameters_list.txt")
+    input_files["tmpl_da_pars"]   = os.path.join(basedir, "models_configs", model, "templates", "tmpl_da_pars.tmpl")
+    input_files["tmpl_pars"]      = os.path.join(basedir, "models_configs", model, "templates", "tmpl_pars.tmpl")
+
+    input_files["forcing"]        = os.path.join(basedir, "sites_data", site, "forcing_data", site+"_forcing.txt")
+    input_files["da_pars"]        = os.path.join(basedir, "sites_data", site, "parameters",   site+"_pars.yml")
+    input_files["pars"]           = os.path.join(basedir, "sites_data", site, "parameters",   site+"_da_pars.yml")
+
     for key, f_path in input_files.items():
-        if key == "da_pars":
+        if key == "da_pars" or key == "def_ls_da_pars" or key == "tmpl_da_pars":
             if not os.path.exists(f_path): input_files[key] == None
         else:
             if not os.path.exists(f_path):
@@ -243,6 +279,65 @@ def readYml2Dict(filePath):
     with open(filePath) as f:
         data = yaml.load(f, Loader=yaml.loader.SafeLoader)
     return data
+
+
+
+# =================================================================================================================================
+
+# @app.task(bind=True)
+# def test(self, input_a, input_b):
+#     # This is a prototype for the new interface
+#     # The old implementation uses dockertask which is now deprecated
+#     # The new implementation uses ssh (via the paramiko lib)
+#     # This requires the sshd demom to be started on the container we are connecting
+#     # The username and  passwords are shared via environ variables which are also used
+#     # to initialize the containers
+#     # Similar to the old implementation we share file paths instead of the actual data
+#     # This is the reason why this function returns a result_file_path. 
+#     # In this case this is the location of text file written by the fortran container.
+#     # The javascript code of the frontend can see the return value of this function by querying the api.
+#     # and so can find the loacation of the actual file. (In many of the old examples this is an image)
+#     # The javascript code of the frontend (running in the browser of an ecopad user on a different machine) 
+#     # then makes an request to the 
+#     # webserver which can serve the file since the path points to a location under the 
+#     # webroot directory.
+#     task_id = str(self.request.id)
+    
+#     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD'))
+#     result_file_path="/data/output_{0}.txt".format(task_id)
+#     # ssh_cmd = "./test {0} {1} {2}".format(input_a, input_b, result_file_path)
+#     ssh_cmd = "cp {0} {1}".format("/data/test.txt", result_file_path)
+#     stdin, stdout, stderr = client.exec_command(ssh_cmd)
+#     result = str(stdout.read())
+#     return result_file_path
+
+# @app.task(bind=True)
+# def jian(self, input_a, input_b):
+#     task_id = str(self.request.id)
+#     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD'))
+#     result_file_path="/data/output_jian_{0}.txt".format(task_id)
+#     ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format('input/SPRUCE_pars.txt', 'input/SPRUCE_forcing.txt', 'input/SPRUCE_obs.txt', '/data/output/', '0', 'input/SPRUCE_da_pars.txt')
+#     stdin, stdout, stderr = client.exec_command(ssh_cmd)
+#     result = str(stdout.read())
+#     import pandas as pd
+#     dates = pd.read_csv('/data/output/Simu_soiltemp.txt')
+#     data4w = dates.iloc[:,:2]
+#     data4w.columns = ["ts","xs"]
+#     data4w.to_csv(result_file_path, index=None)
+#     # result_file_path=""
+#     return result_file_path
+
+# changed by Jian: 
+#   Ecopad includes the functions:
+#       1. choose model, forcing data, parameter files.
+#           input values: "model_name" represents the model name and related files (list of params)
+#           site value: paramters file, forcing data file.
+#       2. functions:
+#           run_simulation;
+#           run_data_assimilation;
+#           run_forecast;
+
+
 
 
 
