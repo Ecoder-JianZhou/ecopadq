@@ -102,7 +102,7 @@ def run_pull_data(self, model_name, site_name):
     '''
     task_id     = str(self.request.id) # Get the task id from portal
     resultDir   = setup_result_directory(task_id)
-    teco_spruce_pulldata(os.path.join(basedir,'sites_data', site_name, 'forcing_data' ,'pull_forcing_data_SPRUCE'))
+    teco_spruce_pulldata(os.path.join(basedir,'sites_data', site_name, 'forcing_data' ,'pull_forcing_data'))
     return "sucessfull!"
     
 
