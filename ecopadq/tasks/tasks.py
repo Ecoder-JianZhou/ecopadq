@@ -239,7 +239,7 @@ def create_template(tmpl, tmpl_name,params,resultDir,check_function, fp_pars_ls)
     # tmpl = os.path.join(basedir, "model_infos", model, 'templates/tmpl_{0}.tmpl'.format(tmpl_name)) # Jian: not os.path.dirname(__file__)
     with open(tmpl,'r') as f:
         template=Template(f.read())
-    params_file = os.path.join(resultDir,"input",'{0}.txt'.format(tmpl_name))
+    params_file = os.path.join(resultDir,'{0}.txt'.format(tmpl_name))
     with open(params_file,'w') as f2:
         obj = check_function(fp_pars_ls, params)
         print(obj)
