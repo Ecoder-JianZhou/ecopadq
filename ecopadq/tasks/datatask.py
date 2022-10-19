@@ -126,7 +126,8 @@ def teco_spruce_pulldata(destination='./spruce_data'):
         # Jian: save the pulled data 
         time_now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         teco_spruce1.to_csv('{0}/SPRUCE_forcing_{1}.txt'.format(destination, time_now),'\t',index=False)
-
+        # Jian: drop the over range values
+        teco_spruce1 = teco_spruce1.drop(teco_spruce1[(teco_spruce1.year<2011)].index)
         #file which contain earlier data(2011-2015)
         j1=pd.read_csv(initial_text,'\t')
 

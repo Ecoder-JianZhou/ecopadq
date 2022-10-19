@@ -94,6 +94,7 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
     result_file_path='/webData/show_forecast_results/'+"lastest_forecast_results_380ppm_0degree.txt" # Jian: the path in TECO docker that links to "/web/data"
     dates.to_csv(result_file_path, index=None) 
 
+
 @app.task(bind=True)
 def run_pull_data(self, model_name, site_name):
     '''
