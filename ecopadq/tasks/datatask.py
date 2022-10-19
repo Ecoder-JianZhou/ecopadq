@@ -66,7 +66,7 @@ def teco_spruce_pulldata(destination='./spruce_data'):
     initial_text=open("{0}/initial.txt".format(destination),"r")
     #pulling data from the url
     print('trying to pull datapppp')   
-    url = 'ftp://{0}:{1}@sprucedata.ornl.gov/DataFiles_2015/EM1_Table1.dat'.format(ftp_username,ftp_password)
+    url = 'ftp://{0}:{1}@sprucedata.ornl.gov/DataFiles_2016/EM1_Table1.dat'.format(ftp_username,ftp_password)
     print(url)
     #    sp_data=pd.read_csv(url,skiprows=5)
     sp_data = pd.read_fwf(url)
