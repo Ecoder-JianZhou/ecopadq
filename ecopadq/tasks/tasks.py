@@ -75,6 +75,7 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
         Forecasting: initial version to 
         args: model_name, site_name. 
     """
+    # muti-run parameters and ...
     task_id     = str(self.request.id) # Get the task id from portal
     input_files = check_files(model_name, site_name) # dict: def_ls_pars; def_ls_da_pars; tmpl_da_pars; tmpl_pars; forcing; da_pars; pars.
     resultDir   = setup_result_directory(task_id)
