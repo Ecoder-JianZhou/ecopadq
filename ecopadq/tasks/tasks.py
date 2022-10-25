@@ -117,8 +117,26 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
         #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
     # 2. forcing
+    params["SLA"] = param_mean[1]
+    params["GLmax"] = param_mean[2]
+    params["GRmax"] = param_mean[3]
+    params["Gsmax"] = param_mean[4]
+    params["Vcmax0"] = param_mean[5]
+    params["Tau_Leaf"] = param_mean[6]
+    params["Tau_Wood"] = param_mean[7]
+    params["Tau_Root"] = param_mean[8]
+    params["Tau_F"] = param_mean[9]
+    params["Tau_C"] = param_mean[10]
+    params["Tau_Micro"] = param_mean[11]
+    params["Tau_slowSOM"] = param_mean[12]
+    params["Tau_Passive"] = param_mean[13]
+    params["gddonset"] = param_mean[14]
+    params["Q10"] = param_mean[15]
+    params["RL0"] = param_mean[16]
+    params["Rs0"] = param_mean[17]
+    params["Rr0"] = param_mean[18] 
     for i in range(10):
-        params = param_mean
+        # params = param_mean
         if i<9:
             input_files["forcing"] = "/data/ecopad_test/sites_data/SPRUCE/forcing_data/weather_generate/preset_2011-2024/EMforcing00"+str(i+1)+".csv"
         elif i<99:
