@@ -86,7 +86,7 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
     paraset       = pd.read_csv(os.path.join(basedir,"sites_data/SPRUCE/parameters/data_assimilation","Paraest.txt")).sample(n=100, replace=False, random_state=None)
     paraset_array = paraset.to_numpy()
     param_mean    = np.nanmean(paraset_array, axis=0) # id, param-1 ...
-    for i in range(100):
+    for i in range(10):
         params["SLA"] = paraset_array[i,1]
         params["GLmax"] = paraset_array[i,2]
         params["GRmax"] = paraset_array[i,3]
@@ -111,7 +111,7 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
         param_filename = create_template(input_files['tmpl_pars'], 'pars',params,resultDir+"/input/input_"+str(i),check_params, input_files['def_ls_pars'])
         client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
         # Jian: change the argments in TECO to parameters, forcing data, resultDir, mode, da_pars, obs_file, 
-        ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/ouput_'+str(i), '0', 'input/SPRUCE_da_pars.txt')
+        ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/output_'+str(i), '0', 'input/SPRUCE_da_pars.txt')
         print(ssh_cmd)
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
