@@ -106,6 +106,8 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
         params["Rs0"] = paraset_array[i,17]
         params["Rr0"] = paraset_array[i,18] 
         # create param file 
+        os.makedirs(resultDir+"/input_"+str(i))
+        os.makedirs(resultDir+"/output_"+str(i))
         param_filename = create_template(input_files['tmpl_pars'], 'pars',params,resultDir+"/input_"+str(i),check_params, input_files['def_ls_pars'])
         client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
         # Jian: change the argments in TECO to parameters, forcing data, resultDir, mode, da_pars, obs_file, 
