@@ -113,7 +113,7 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
-        import pandas as pd
+        # import pandas as pd
         dates = pd.read_csv(resultDir+'/output/Simu_dailyflux14001.txt')
         dates.columns = ["sdoy", "GPP", "NEE", "ER", "NPP", "Ra", "QC1", "QC2", "QC3", "QC4", "QC5", "QC6", "QC7", "QC8", "Rh"]
         result_file_path='/webData/show_forecast_results/'+"lastest_forecast_results_380ppm_0degree.txt" # Jian: the path in TECO docker that links to "/web/data"
