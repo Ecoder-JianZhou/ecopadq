@@ -82,7 +82,7 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
     input_files = check_files(model_name, site_name) # dict: def_ls_pars; def_ls_da_pars; tmpl_da_pars; tmpl_pars; forcing; da_pars; pars.
     # 1. parameters
     params        = readYml2Dict(input_files["pars"])
-    paraset       = pd.read_csv(os.path.join(basedir,"sites_data/SPRUCE/forcing_data/weather_generate/preset_2011-2024","Paraest.txt")).sample(n=100, replace=False, random_state=None)
+    paraset       = pd.read_csv(os.path.join(basedir,"sites_data/SPRUCE/parameters/data_assimilation","Paraest.txt")).sample(n=100, replace=False, random_state=None)
     paraset_array = paraset.to_numpy()
     param_mean    = np.nanmean(paraset_array, axis=0) # id, param-1 ...
     for i in range(100):
