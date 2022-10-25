@@ -8,6 +8,7 @@ import yaml
 #from subprocess import call,STDOUT
 from jinja2 import Template
 from shutil import copyfile, move
+import pandas as pd
 #from glob import glob
 # import requests,os  # Jian: no module named 'requests'
 #from pymongo import MongoClient
@@ -60,7 +61,6 @@ def run_simulation(self, model_name, site_name):
     stdin, stdout, stderr = client.exec_command(ssh_cmd)
     #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
     result = str(stdout.read())
-    import pandas as pd
     dates = pd.read_csv(resultDir+'/output/Simu_dailyflux14001.txt')
     data4w = dates.iloc[:,:2]
     data4w.columns = ["ts","xs"]
@@ -75,32 +75,55 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
         Forecasting: initial version to 
         args: model_name, site_name. 
     """
-    # muti-run parameters and ...
     task_id     = str(self.request.id) # Get the task id from portal
-    input_files = check_files(model_name, site_name) # dict: def_ls_pars; def_ls_da_pars; tmpl_da_pars; tmpl_pars; forcing; da_pars; pars.
     resultDir   = setup_result_directory(task_id)
-    # create param file 
-    params      = readYml2Dict(input_files["pars"])
-    param_filename = create_template(input_files['tmpl_pars'], 'pars',params,resultDir+"/input",check_params, input_files['def_ls_pars'])
-    client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
-    # Jian: change the argments in TECO to parameters, forcing data, resultDir, mode, da_pars, obs_file, 
-    ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '0', 'input/SPRUCE_da_pars.txt')
-    print(ssh_cmd)
-    stdin, stdout, stderr = client.exec_command(ssh_cmd)
-    #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
-    result = str(stdout.read())
-    import pandas as pd
-    dates = pd.read_csv(resultDir+'/output/Simu_dailyflux14001.txt')
-    dates.columns = ["sdoy", "GPP", "NEE", "ER", "NPP", "Ra", "QC1", "QC2", "QC3", "QC4", "QC5", "QC6", "QC7", "QC8", "Rh"]
-    result_file_path='/webData/show_forecast_results/'+"lastest_forecast_results_380ppm_0degree.txt" # Jian: the path in TECO docker that links to "/web/data"
-    dates.to_csv(result_file_path, index=None) 
-
+    # forcing data: data\ecopad_test\sites_data\SPRUCE\forcing_data\weather_generate\preset_2011-2024
+    # parameter sets: data\ecopad_test\sites_data\SPRUCE\parameters\data_assimilation
+    input_files = check_files(model_name, site_name) # dict: def_ls_pars; def_ls_da_pars; tmpl_da_pars; tmpl_pars; forcing; da_pars; pars.
+    # 1. parameters
+    params        = readYml2Dict(input_files["pars"])
+    paraset       = pd.read_csv(os.path.join(basedir,"\sites_data\SPRUCE\forcing_data\weather_generate\preset_2011-2024","Paraest.txt")).sample(n=100, replace=False, random_state=None)
+    paraset_array = paraset.to_numpy()
+    param_mean    = np.nanmean(paraset_array, axis=0) # id, param-1 ...
+    for i in range(100):
+        params["SLA"] = paraset_array[i,1]
+        params["GLmax"] = paraset_array[i,2]
+        params["GRmax"] = paraset_array[i,3]
+        params["Gsmax"] = paraset_array[i,4]
+        params["Vcmax0"] = paraset_array[i,5]
+        params["Tau_Leaf"] = paraset_array[i,6]
+        params["Tau_Wood"] = paraset_array[i,7]
+        params["Tau_Root"] = paraset_array[i,8]
+        params["Tau_F"] = paraset_array[i,9]
+        params["Tau_C"] = paraset_array[i,10]
+        params["Tau_Micro"] = paraset_array[i,11]
+        params["Tau_slowSOM"] = paraset_array[i,12]
+        params["Tau_Passive"] = paraset_array[i,13]
+        params["gddonset"] = paraset_array[i,14]
+        params["Q10"] = paraset_array[i,15]
+        params["RL0"] = paraset_array[i,16]
+        params["Rs0"] = paraset_array[i,17]
+        params["Rr0"] = paraset_array[i,18] 
+        # create param file 
+        param_filename = create_template(input_files['tmpl_pars'], 'pars',params,resultDir+"/input_"+str(i),check_params, input_files['def_ls_pars'])
+        client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
+        # Jian: change the argments in TECO to parameters, forcing data, resultDir, mode, da_pars, obs_file, 
+        ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output_'+str(i)+'/', '0', 'input/SPRUCE_da_pars.txt')
+        print(ssh_cmd)
+        stdin, stdout, stderr = client.exec_command(ssh_cmd)
+        #     stdin, stdout, stderr = client.exec_command(ssh_cmd)
+        result = str(stdout.read())
+        import pandas as pd
+        dates = pd.read_csv(resultDir+'/output/Simu_dailyflux14001.txt')
+        dates.columns = ["sdoy", "GPP", "NEE", "ER", "NPP", "Ra", "QC1", "QC2", "QC3", "QC4", "QC5", "QC6", "QC7", "QC8", "Rh"]
+        result_file_path='/webData/show_forecast_results/'+"lastest_forecast_results_380ppm_0degree.txt" # Jian: the path in TECO docker that links to "/web/data"
+        dates.to_csv(result_file_path, index=None) 
+        # 2. forcing
 
 @app.task(bind=True)
 def run_pull_data(self, model_name, site_name):
     '''
         pull forcing data from website, for example, SPRUCE
-
     '''
     task_id     = str(self.request.id) # Get the task id from portal
     resultDir   = setup_result_directory(task_id)
