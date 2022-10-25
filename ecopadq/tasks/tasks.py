@@ -9,6 +9,7 @@ import yaml
 from jinja2 import Template
 from shutil import copyfile, move
 import pandas as pd
+import numpy as np
 #from glob import glob
 # import requests,os  # Jian: no module named 'requests'
 #from pymongo import MongoClient
