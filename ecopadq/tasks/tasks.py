@@ -162,7 +162,7 @@ def run_forecast(self, model_name, site_name): #def teco_spruce_forecast(pars,fo
     # dates.to_csv(result_file_path, index=None) 
 
 @app.task(bind=True)
-def run_Rscript(self, model_name, site_name):
+def run_matrix_models(self, model_name, site_name):
     task_id     = str(self.request.id) # Get the task id from portal
     resultDir   = setup_result_directory(task_id)
     client.connect('local_fortran_example',username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) # Jian: 20220930 - use the "local_fortran_example", which will be wroten a Docker named as model_name
