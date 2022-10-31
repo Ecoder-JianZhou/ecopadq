@@ -12,6 +12,7 @@
 ## ========================================================================================
 
 from paramiko import SSHClient, AutoAddPolicy
+import os
 
 client=SSHClient()
 client.set_missing_host_key_policy(AutoAddPolicy())
@@ -30,10 +31,11 @@ class ecopadObj:
 
     def run_simulation(self):
         # call for the run.py in each model docker. 
-        ssh_cmd = "python run.py" "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '0', 'input/SPRUCE_da_pars.txt')
+        ssh_cmd = "python run.py"
         print(ssh_cmd)
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
+        print(result)
 
     def run_spinup(self):
         print("spinup ...")
