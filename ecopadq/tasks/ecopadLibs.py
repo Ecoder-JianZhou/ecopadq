@@ -37,7 +37,7 @@ class ecopadObj:
         result = str(stdout.read())
         print(result)
         print(str(stdin.read()))
-        print(str(stderr.read()))
+        print(str(stderr))
         return "jzhou"
 
     def run_spinup(self):
