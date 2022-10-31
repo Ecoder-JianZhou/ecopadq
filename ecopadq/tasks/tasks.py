@@ -29,7 +29,7 @@ def run_auto_forecast(self, modname, sitname):
     ''' 
     '''
     print("This is auto_forecasting ...")
-    task_id = str(self.request.id)          # Get the task id from portal
+    task_id = str(self.request.id)          # Get the task id from portal 
     taskObj = ecopadObj(modname, sitname)
 
 
@@ -38,4 +38,29 @@ def run_auto_forecast(self, modname, sitname):
 @app.task(bind=True)
 def test_run_simulation(self, modname, sitname):
     print("This is the simulaiton ...")
+    task_id = str(self.request.id)          # Get the task id from portal
+
+@app.task(bind=True)
+def test_run_data_assimilation(self, modname, sitname):
+    print("This is the test_run_data_assimilation ...")
+    task_id = str(self.request.id)          # Get the task id from portal
+
+@app.task(bind=True)
+def test_run_forecasting(self, modname, sitname):
+    print("This is the test_run_forecasting ...")
+    task_id = str(self.request.id)          # Get the task id from portal
+
+@app.task(bind=True)
+def test_run_spinup(self, modname, sitname):
+    print("This is the test_run_spinup ...")
+    task_id = str(self.request.id)          # Get the task id from portal
+
+@app.task(bind=True)
+def test_run_pull_data(self, modname, sitname):
+    print("This is the test_run_pull_data ...")
+    task_id = str(self.request.id)          # Get the task id from portal
+
+@app.task(bind=True)
+def test_run_matrix_models(self, modname, sitname):
+    print("This is the test_run_matrix_models ...")
     task_id = str(self.request.id)          # Get the task id from portal
