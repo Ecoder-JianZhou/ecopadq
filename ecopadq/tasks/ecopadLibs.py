@@ -31,7 +31,7 @@ class ecopadObj:
 
     def run_simulation(self):
         # call for the run.py in each model docker. 
-        ssh_cmd = "python run.py"
+        ssh_cmd = "python3 run.py"
         print(ssh_cmd)
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
