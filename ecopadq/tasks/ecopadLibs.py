@@ -36,8 +36,8 @@ class ecopadObj:
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
         print(result)
-        print(str(stdin.read()))
-        print(str(stderr))
+        print(stdin)
+        print(stderr)
         return "jzhou"
 
     def run_spinup(self):
