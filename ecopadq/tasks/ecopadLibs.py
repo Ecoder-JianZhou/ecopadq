@@ -12,18 +12,25 @@
 ## ========================================================================================
 
 from paramiko import SSHClient, AutoAddPolicy
+
 client=SSHClient()
 client.set_missing_host_key_policy(AutoAddPolicy())
 client.load_system_host_keys()
 
+basedir="/data/ecopad_test"
+
 class ecopadObj:
-    def __init__(self, dockerName, modelName, sitname):
+    def __init__(self, dockerName, task_id, modname, sitname):
         # use the "local_fortran_example", which will be wroten a Docker named as model_name
         client.connect(dockerName,username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) 
+        self.task_id = task_id
+        self.modname = modname
+        self.sitname = sitname 
+        # self.setup_result_directory()
 
     def run_simulation(self):
-        print("simulation ...")
-        ssh_cmd = "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '0', 'input/SPRUCE_da_pars.txt')
+        # call for the run.py in each model docker. 
+        ssh_cmd = "python run.py" "./test {0} {1} {2} {3} {4} {5}".format(param_filename, input_files["forcing"], 'input/SPRUCE_obs.txt', resultDir+'/output/', '0', 'input/SPRUCE_da_pars.txt')
         print(ssh_cmd)
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
@@ -36,3 +43,11 @@ class ecopadObj:
 
     def run_forecast(self):
         print("forecast ...")
+
+    def setup_result_directory(self):
+        resultDir = os.path.join(basedir, 'ecopad_tasks/', self.task_id)
+        os.makedirs(resultDir)
+        os.makedirs("{0}/input".format(resultDir))
+        os.makedirs("{0}/output".format(resultDir))
+        os.makedirs("{0}/plot".format(resultDir))
+        return resultDir 
