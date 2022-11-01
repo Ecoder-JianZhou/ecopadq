@@ -40,8 +40,7 @@ def test_run_simulation(self, modname, sitname):
     print("This is the simulaiton ...")
     task_id = str(self.request.id)          # Get the task id from portal
     taskObj = ecopadObj("local_fortran_example", task_id, modname, sitname)
-    print("teteststet ....")
-    print(taskObj.run_simulation())
+    results = taskObj.run_simulation()
 
 @app.task(bind=True)
 def test_run_data_assimilation(self, modname, sitname):
