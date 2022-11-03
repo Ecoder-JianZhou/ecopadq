@@ -35,7 +35,8 @@ class ecopadObj:
         print(ssh_cmd)
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
-        return "jzhou"
+        print(result)
+        return result
 
     def run_spinup(self):
         print("spinup ...")
@@ -48,8 +49,9 @@ class ecopadObj:
 
     def setup_result_directory(self):
         resultDir = os.path.join(basedir, 'ecopad_tasks/', self.task_id)
-        self.resultDir = os.makedirs(resultDir)
+        os.makedirs(resultDir)
         os.makedirs("{0}/input".format(resultDir))
         os.makedirs("{0}/output".format(resultDir))
         os.makedirs("{0}/plot".format(resultDir))
+        self.resultDir = resultDir
         return resultDir 
