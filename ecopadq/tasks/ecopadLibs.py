@@ -27,17 +27,14 @@ class ecopadObj:
         self.task_id = task_id
         self.modname = modname
         self.sitname = sitname 
-        # self.setup_result_directory()
+        self.setup_result_directory()
 
     def run_simulation(self):
         # call for the run.py in each model docker. 
-        ssh_cmd = "python3 run.py {0}".format(os.path.join(basedir, "sites_data", self.sitname,"setting.yml"))
+        ssh_cmd = "python3 run.py {0} {1} {2}".format(os.path.join(basedir, "sites_data", self.sitname,"setting.yml"), modname, self.resultDir)
         print(ssh_cmd)
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
-        print(result)
-        print(stdin)
-        print(stderr)
         return "jzhou"
 
     def run_spinup(self):
@@ -51,7 +48,7 @@ class ecopadObj:
 
     def setup_result_directory(self):
         resultDir = os.path.join(basedir, 'ecopad_tasks/', self.task_id)
-        os.makedirs(resultDir)
+        self.resultDir = os.makedirs(resultDir)
         os.makedirs("{0}/input".format(resultDir))
         os.makedirs("{0}/output".format(resultDir))
         os.makedirs("{0}/plot".format(resultDir))
