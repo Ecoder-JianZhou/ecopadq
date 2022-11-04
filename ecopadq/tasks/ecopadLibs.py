@@ -28,6 +28,7 @@ class ecopadObj:
         self.modname = modname
         self.sitname = sitname 
         self.setup_result_directory()
+        self.experiment = "lastest_forecast_results_380ppm_0degree"
 
     def run_simulation(self):
         # call for the run.py in each model docker. 
@@ -35,14 +36,19 @@ class ecopadObj:
         print(ssh_cmd)
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
-        print(result)
+        if self.modname == "all":  
+            self.transfer2WebShow(self.experiment) # test forecasting
         return result
 
     def run_spinup(self):
         print("spinup ...")
+        # Just for TECO_SPRUCE model because the matrix models have the process of spinup
+        
 
     def run_data_assimilation(self):
         print("data assimilation ...")
+        # MIDA or the data assimilation process in TECO_SPRUCE? 
+
 
     def run_forecast(self):
         print("forecast ...")
@@ -55,3 +61,13 @@ class ecopadObj:
         os.makedirs("{0}/plot".format(resultDir))
         self.resultDir = resultDir
         return resultDir 
+    
+    def transfer2WebShow(self):
+        # id/output/gpp.xlsx|npp.xlsx|nee.xlsx|er.xlsx|ra.xlsx|rh.xlsx|cStorage.xlsx
+        ls2show = ["gpp.xlsx","npp.xlsx","nee.xlsx","er.xlsx","ra.xlsx","rh.xlsx","cStorage.xlsx"]
+        import shutil
+        for ifile in ls2show:
+            sourceFile      = self.resultDir+"/output/"+ifile
+            destinationFile = "/webData/show_forecast_results/"+self.experiment+"/"+ifile
+            if os.path.exists(destinationFile): os.remove(destinationFile) 
+            temp = shutil.copy(sourceFile, destinationFile)
