@@ -37,7 +37,7 @@ class ecopadObj:
         stdin, stdout, stderr = client.exec_command(ssh_cmd)
         result = str(stdout.read())
         if self.modname == "all":  
-            self.transfer2WebShow(self.experiment) # test forecasting
+            self.transfer2WebShow() # test forecasting
         return result
 
     def run_spinup(self):
