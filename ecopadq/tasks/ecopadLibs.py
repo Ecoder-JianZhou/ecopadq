@@ -63,8 +63,8 @@ class ecopadObj:
         return resultDir 
     
     def transfer2WebShow(self):
-        # id/output/gpp.xlsx|npp.xlsx|nee.xlsx|er.xlsx|ra.xlsx|rh.xlsx|cStorage.xlsx
-        ls2show = ["gpp.xlsx","npp.xlsx","nee.xlsx","er.xlsx","ra.xlsx","rh.xlsx","cStorage.xlsx"]
+        # id/output/gpp.csv|npp.csv|nee.csv|er.csv|ra.csv|rh.csv|cStorage.csv
+        ls2show = ["gpp.csv","npp.csv","nee.csv","er.csv","ra.csv","rh.csv","cStorage.csv"]
         import shutil
         for ifile in ls2show:
             sourceFile      = self.resultDir+"/output/"+ifile
