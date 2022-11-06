@@ -30,6 +30,17 @@ class ecopadObj:
         self.setup_result_directory()
         self.experiment = "lastest_forecast_results_380ppm_0degree"
 
+    def run_auto_forecast(self):
+        # 
+        ssh_cmd = "python3 run.py {0} {1} {2}".format(os.path.join(basedir, "sites_data", self.sitname,"setting.yml"), self.modname, self.resultDir)
+        print(ssh_cmd)
+        stdin, stdout, stderr = client.exec_command(ssh_cmd)
+        result = str(stdout.read())
+        if self.modname == "all":  
+            self.transfer2WebShow() # test forecasting
+        return result
+
+
     def run_simulation(self):
         # call for the run.py in each model docker. 
         ssh_cmd = "python3 run.py {0} {1} {2}".format(os.path.join(basedir, "sites_data", self.sitname,"setting.yml"), self.modname, self.resultDir)
@@ -70,4 +81,4 @@ class ecopadObj:
             sourceFile      = self.resultDir+"/output/"+ifile
             destinationFile = "/webData/show_forecast_results/"+self.experiment+"/"+ifile
             if os.path.exists(destinationFile): os.remove(destinationFile) 
-            temp = shutil.copy(sourceFile, destinationFile)
+            temp = shutil.copyfile(sourceFile, destinationFile)
