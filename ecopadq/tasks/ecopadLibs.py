@@ -54,10 +54,11 @@ class ecopadObj:
             merge_data(pulledFile, weatherPath, newFile)
             ls_new_forcing.append(newFile)
         # read different parameters: parameters/data_assimilation
-        df_params = pd.read_csv(os.path.join(basedir,'sites_data', self.sitname, "parameters","data_assimilation","Paraest.txt"), header=None)
-        ls_params = ["SLA",  "GLmax",    "GRmax",       "Gsmax", "Vcmax0", "Tau_Leaf", "Tau_Wood", "Tau_Root","Tau_F",
-                     "Tau_C","Tau_Micro","Tau_SlowSOM", "Tau_Passive", "gddonset", "Q10", "Rl0","Rs0","Rr0"]
-        df_params.columns = ls_params
+        df_params_org = pd.read_csv(os.path.join(basedir,'sites_data', self.sitname, "parameters","data_assimilation","Paraest.txt"), header=None)
+        ls_params = ["id","SLA",  "GLmax",    "GRmax",       "Gsmax", "Vcmax0", "Tau_Leaf", "Tau_Wood", "Tau_Root","Tau_F",
+                     "Tau_C","Tau_Micro","Tau_SlowSOM", "Tau_Passive", "gddonset", "Q10", "Rl0","Rs0","Rr0","nan"]
+        df_params_org.columns = ls_params
+        df_params = df_params_org.loc[:,ls_params[1:-1]]
         # input: paramters
         task_inParams = os.path.join(self.resultDir,"input","parameters")
         os.makedirs(task_inParams, exist_ok=True)
