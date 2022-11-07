@@ -15,6 +15,7 @@ from paramiko import SSHClient, AutoAddPolicy
 import os, yaml
 from .spruce_tasks import pull_data, merge_data
 import shutil, random
+import pandas as pd
 
 client=SSHClient()
 client.set_missing_host_key_policy(AutoAddPolicy())
@@ -44,12 +45,12 @@ class ecopadObj:
         # read future forcing data: read preset(2011-2024) data
         os.makedirs(self.resultDir+"/forcing", exist_ok = True) # create a fold to put the new forcing data
         preWeatherFile = os.path.join(basedir,'sites_data', self.sitname, 'forcing_data', 'weather_generate','preset_2011-2024') # 300 files
-        temp_rand      = random.sample(range(1,301), 100) # 100 random from [1,300]
+        temp_rand      = random.sample(range(1,301), 10) # 100 random from [1,300]
         ls_new_forcing     = []
         for idx, iRand in enumerate(temp_rand):
             str_iRand   = str(iRand).zfill(3)
             weatherPath = preWeatherFile+"/EMforcing"+str_iRand+".csv"
-            newFile     = self.resultDir+"/forcing"+"/SPRUCE_forcing"+str_iRand+".txt"
+            newFile     = self.resultDir+"/input/forcing"+"/SPRUCE_forcing"+str_iRand+".txt"
             merge_data(pulledFile, weatherPath, newFile)
             ls_new_forcing.append(newFile)
         # read different parameters: parameters/data_assimilation
