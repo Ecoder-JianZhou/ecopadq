@@ -61,8 +61,9 @@ class ecopadObj:
                 3. run simulation
         '''
         try:
-            # mod_site      = dict_sites[self.sitname] # importlib.import_module(script_site)   # import specific site task module
-            exec("import "+self.sitname+" as mod_site")
+            script_site   = self.sitname+"_tasks"
+            mod_site      =  importlib.import_module(script_site.lower())   # import specific site task module
+            # exec("import "+self.sitname+" as mod_site")
             # 1. pull data must have specific script to finish it. uniform script name format: "{sitname}_tasks". pull the data and update the forcing data.
             # ----- set the pull data paths
             path_pullData   = os.path.join(basedir,'sites_data', self.sitname, 'forcing_data' ,'pull_forcing_data') 
