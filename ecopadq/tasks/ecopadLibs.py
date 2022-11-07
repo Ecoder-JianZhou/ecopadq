@@ -94,7 +94,7 @@ class ecopadObj:
                 for iSimu, iFile_params in enumerate(lsPath_newParams):
                     iPath_simu = os.path.join(path_temp_simu, "simulation_"+str(iSimu)) 
                     os.makedirs(iPath_simu, exist_ok=True)
-                    ssh_cmd = "python3 run.py {0} {1} {2} {3} {4} {5}".format(self.modname, iFile_params, iFile_forcing, self.taskDir, iPath_simu)
+                    ssh_cmd = "python3 run.py {0} {1} {2} {3} {4}".format(self.modname, iFile_params, iFile_forcing, self.taskDir, iPath_simu)
                     print(ssh_cmd)
                     stdin, stdout, stderr = client.exec_command(ssh_cmd)
                     result = str(stdout.read())
