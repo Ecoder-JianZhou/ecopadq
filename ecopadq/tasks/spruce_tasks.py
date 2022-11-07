@@ -6,6 +6,7 @@ import urllib, shutil
 import sys
 from itertools import groupby
 from operator import itemgetter
+import random, os
 
 ftp_username = "ftp_public"
 ftp_password = "spruce_s1"
@@ -131,7 +132,6 @@ def weather_generater(nLen, initFile, outPath):
 
 def weather_generater_preset(nLen, initFile, outPath):
     # Jian: use the preset of weather data (2011-2024) as old ecopad for testing
-    import random, os
     path_presetForcing = "/data/ecopad_test/sites_data/SPRUCE/forcing_data/weather_generate/preset_2011-2024" # 300 files
     temp_rand      = random.sample(range(1,301), nLen) # 100 random from [1,300]
     ls_new_forcing     = []
