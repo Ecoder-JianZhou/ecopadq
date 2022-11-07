@@ -17,7 +17,7 @@ import os, yaml
 import shutil, random
 import pandas as pd
 import numpy as np
-import importlib
+# import importlib
 
 client=SSHClient()
 client.set_missing_host_key_policy(AutoAddPolicy())
@@ -27,10 +27,10 @@ basedir="/data/ecopad_test"
 # startYr = 2015
 ls_spec_sites  = ["SPRUCE"]
 ls_spec_models = ["TECO_SPRUCE","matrix_models","all"]  # Jian: "all" is used to test the TECO_SPRUCE AND matrix_models at SPRUCE site
-dict_sites     = {}
-for iSite in ls_spec_sites:
-    script_site = iSite + "_tasks"  
-    dict_sites[iSite] = importlib.import_module(script_site)
+# dict_sites     = {}
+# for iSite in ls_spec_sites:
+#     script_site = iSite + "_tasks"  
+#     dict_sites[iSite] = ecec("import "+ script_site) # importlib.import_module(script_site)
 # ------------------------------------------------------------------
 
 class ecopadObj:
@@ -61,7 +61,8 @@ class ecopadObj:
                 3. run simulation
         '''
         try:
-            mod_site      = dict_sites[self.sitname] # importlib.import_module(script_site)   # import specific site task module
+            # mod_site      = dict_sites[self.sitname] # importlib.import_module(script_site)   # import specific site task module
+            exec("import "+self.sitname+" as mod_site")
             # 1. pull data must have specific script to finish it. uniform script name format: "{sitname}_tasks". pull the data and update the forcing data.
             # ----- set the pull data paths
             path_pullData   = os.path.join(basedir,'sites_data', self.sitname, 'forcing_data' ,'pull_forcing_data') 
