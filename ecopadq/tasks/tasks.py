@@ -32,7 +32,7 @@ def run_auto_forecast(self, modname, sitname):
     print("This is auto_forecasting ...")
     task_id = str(self.request.id)          # Get the task id from portal 
     taskObj = ecopadObj(CTN_name, task_id, modname, sitname)
-    results = taskObj.auto_forecasting()
+    results = taskObj.run_auto_forecast()
 
 # --------------------------------------------------------------------
 # test modules ...
@@ -42,7 +42,7 @@ def test_run_simulation(self, modname, sitname):
     task_id = str(self.request.id)          # Get the task id from portal
     taskObj = ecopadObj(CTN_name, task_id, modname, sitname)
     # results = taskObj.run_simulation()
-    results = taskObj.auto_forecasting()
+    results = taskObj.run_auto_forecast()
 
 @app.task(bind=True)
 def test_run_data_assimilation(self, modname, sitname):
