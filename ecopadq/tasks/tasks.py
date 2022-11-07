@@ -19,7 +19,8 @@ import pandas as pd
 import numpy as np
 from .ecopadLibs import ecopadObj
 
-basedir="/data/ecopad_test"                 # Default base directory
+basedir  = "/data/ecopad_test"                 # Default base directory
+CTN_name = "local_fortran_example"          # Jian: maybe have other container future
 
 app = Celery()
 app.config_from_object(celeryconfig)
@@ -30,7 +31,7 @@ def run_auto_forecast(self, modname, sitname):
     '''
     print("This is auto_forecasting ...")
     task_id = str(self.request.id)          # Get the task id from portal 
-    taskObj = ecopadObj("local_fortran_example", task_id, modname, sitname)
+    taskObj = ecopadObj(CTN_name, task_id, modname, sitname)
     results = taskObj.auto_forecasting()
 
 # --------------------------------------------------------------------
@@ -39,7 +40,7 @@ def run_auto_forecast(self, modname, sitname):
 def test_run_simulation(self, modname, sitname):
     print("This is the simulaiton ...")
     task_id = str(self.request.id)          # Get the task id from portal
-    taskObj = ecopadObj("local_fortran_example", task_id, modname, sitname)
+    taskObj = ecopadObj(CTN_name, task_id, modname, sitname)
     # results = taskObj.run_simulation()
     results = taskObj.auto_forecasting()
 

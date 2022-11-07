@@ -11,7 +11,8 @@ ftp_username = "ftp_public"
 ftp_password = "spruce_s1"
 
 
-def pull_data(destination):
+
+def pull_data(destination=None):
     ''' the format of forcing data in spruce changed in 2021
         before 2021:
             columnnames = ["TIMESTAMP","RECORD","AirTC_2M_Avg","RH_2M_Avg","AirTCHumm_Avg","RH_Humm_Avg","BP_kPa_Avg","Rain_mm_Tot","WS_ms_S_WVT","WindDir_D1_WVT","WindDir_SD1_WVT","WSDiag_Tot","SmplsF_Tot","Axis1Failed_Tot","Axis2Failed_Tot","BothAxisFailed_Tot","NVMerror_Tot","ROMerror_Tot","MaxGain_Tot","NNDF_Tot","HollowSurf_Avg","Hollow5cm_Avg","Hollow20cm_Avg","Hollow40cm_Avg","Hollow80cm_Avg","Hollow160cm_Avg","Hollow200cm_Avg","HummockSurf_Avg","Hummock5cm_Avg","Hummock20cm_Avg","Hummock40cm_Avg","Hummock80cm_Avg","Hummock160cm_Avg","Hummock200cm_Avg","PAR_2_M_Avg","PAR_NTree1_Avg","PAR_NTree2_Avg","PAR_SouthofHollow1_Avg","PAR_SouthofHollow2_Avg","PAR_NorthofHollow1_Avg","PAR_NorthofHollow2_Avg","PAR_Srub1_Avg","PAR_Srub2_Avg","PAR_Srub3_Avg","PAR_Srub4_Avg","TopofHummock_Avg","MidofHummock_Avg","Surface1_Avg","Surface2_Avg","D1-20cm_Avg","D2-20cm_Avg","TopH_Avg","MidH_Avg","S1_Avg","S2_Avg","Deep-20cm_Avg","short_up_Avg","short_dn_Avg","long_up_Avg","long_dn_Avg","CNR4_Temp_C_Avg","CNR4_Temp_K_Avg","long_up_corr_Avg","long_dn_corr_Avg","Rs_net_Avg","Rl_net_Avg","albedo_Avg","Rn_Avg","SPN1_Total_Avg","SPN1_Diffuse_Avg","Water_Height_Avg","Water_Temp_Avg","Watertable","Dewpoint","Dewpoint_Diff"]
@@ -103,7 +104,7 @@ def pull_data(destination):
         time_now=datetime.now()
         print('now I am writing to the file')
         j3.to_csv('{0}/SPRUCE_forcing.txt'.format(destination),'\t',index=False) 
-        print('finished writing to the file')
+        print('finished writing to the file.')
        
     except Exception as e:
         #raise Exception('the ftp site is down..Using the old sprucing file...')    
@@ -120,10 +121,68 @@ def merge_data(initFile, addFile, resFile):
     startIndex = df_add[(df_add.year==sYear)&(df_add.doy==sDoy)&(df_add.hour==sHour)].index.values[0] 
     df_need_add = df_add.iloc[startIndex:]
     df_new  = pd.concat([df_init,df_need_add]).drop_duplicates().reset_index(drop=True)
-    df_new.to_csv(resFile, index=False)
+    # df_new.to_csv(resFile, index=False)
+    df_new.to_csv(resFile,'\t',index=False) 
 
-def weather_generater():
-    print("This is the module of getting weather data from NOAA ...")
+def weather_generater(nLen, initFile, outPath):
+    print("This is the module of getting weather data from NOAA or preset...")
+    res = weather_generater_preset(nLen, initFile, outPath)
+    return res
+
+def weather_generater_preset(nLen, initFile, outPath):
+    # Jian: use the preset of weather data (2011-2024) as old ecopad for testing
+    import random, os
+    path_presetForcing = "/data/ecopad_test/sites_data/SPRUCE/forcing_data/weather_generate/preset_2011-2024" # 300 files
+    temp_rand      = random.sample(range(1,301), nLen) # 100 random from [1,300]
+    ls_new_forcing     = []
+    for idx, iRand in enumerate(temp_rand):
+        str_iRand   = str(iRand).zfill(3)
+        weatherPath = path_presetForcing+"/EMforcing"+str_iRand+".csv"
+        newFile     = os.path.join(outPath, "/SPRUCE_forcing"+str_iRand+".txt") 
+        merge_data(initFile, weatherPath, newFile)
+        ls_new_forcing.append(newFile) 
+    return ls_new_forcing
+
+def get_params_set(nLen, modname, outPath):
+    import yaml
+    from yaml.loader import SafeLoader
+    path_params   = "/data/ecopad_test/sites_data/SPRUCE/parameters"
+    ls_res_params = []
+     # Jian: here use the TECO_SPRUCE or all(TECO_SPRUCE and matrix_model) as example.
+    if modname == "TECO_SPRUCE" or modname =="all": 
+        initFile_params = "/data/ecopad_test/sites_data/SPRUCE/parameters/SPRUCE_pars.yml" 
+        daFile_params   = "/data/ecopad_test/sites_data/SPRUCE/parameters/data_assimilation/Paraest.txt" # parameter set from Data assimilation
+        # Open the file and load the file
+        with open(initFile_params) as f:
+            dict_initParams = yaml.load(f, Loader=SafeLoader)
+        # read parameter set
+        df_params_org = pd.read_csv(daFile_params, header=None)
+        ls_params = ["id","SLA",  "GLmax",    "GRmax",       "Gsmax", "Vcmax0", "Tau_Leaf", "Tau_Wood", "Tau_Root","Tau_F",
+                     "Tau_C","Tau_Micro","Tau_SlowSOM", "Tau_Passive", "gddonset", "Q10", "Rl0","Rs0","Rr0","nan"]
+        df_params_org.columns = ls_params
+        df_params = df_params_org.loc[:,ls_params[1:-1]]
+        # set nLet rand from the df_params index
+        rand_par  = random.sample(range(1,len(df_params)+1), nLen)
+        for idx, iRand in enumerate(rand_par):
+            str_iRand       = str(iRand)
+            dict_params     = dict_initParams
+            dict_newParam   = df_params.iloc[iRand].to_dict() 
+            file_param      = os.path.join(outPath, "SPRUCE_pars_"+str_iRand+".yml")
+            shutil.copyfile(initFile_params, file_param)
+            for key, value in dict_newParam.items():
+                dict_params["params"][key]=value
+            with open(file_param, 'w') as f:
+                yaml.safe_dump(dict_params, f, default_flow_style=False)
+            ls_res_params.append(file_param)
+    
+    return ls_res_params
+            
+
+
+
+       
+
+
 
 
 def check_na_values(teco_spruce1):
