@@ -62,7 +62,7 @@ class ecopadObj:
         '''
         try:
             script_site   = self.sitname+"_tasks"
-            mod_site      =  importlib.import_module(script_site.lower())   # import specific site task module
+            mod_site      =  importlib.import_module("ecopadq.tasks."+script_site.lower())   # import specific site task module
             # exec("import "+self.sitname+" as mod_site")
             # 1. pull data must have specific script to finish it. uniform script name format: "{sitname}_tasks". pull the data and update the forcing data.
             # ----- set the pull data paths
