@@ -176,13 +176,6 @@ def get_params_set(nLen, modname, outPath):
             ls_res_params.append(file_param)
     
     return ls_res_params
-            
-
-
-def test():
-    print("hhhhh...")
-       
-
 
 
 
