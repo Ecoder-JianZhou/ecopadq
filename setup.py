@@ -10,7 +10,6 @@ setup(name='ecopadq',
         'pandas', # zj: test data
         'pyyaml', # zj:
         'numpy', # zj:
-        "importlib",
 #       'dockertask @ git+git://github.com/ou-ecolab/dockertask.git@test#egg=dockertask',
 #       'celery',
 #       'requests',
