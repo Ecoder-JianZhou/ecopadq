@@ -64,7 +64,7 @@ class ecopadObj:
         os.makedirs(task_inParams, exist_ok=True)
         yml_setting = os.path.join(basedir, "sites_data", self.sitname,"setting.yml")
         yml_pars    = os.path.join(basedir, "sites_data", self.sitname,"parameters",self.sitname+"_pars.yml")
-        rand_par    = random.sample(range(1,len(df_params)+1), 100)
+        rand_par    = random.sample(range(1,len(df_params)+1), 10)
         # We just test the 100 Parameters sets.
         for iSimu, iRand in enumerate(rand_par):  # setting.yml; SPRUCE_pars.yml
             # Jian: This part must be modified becuase it is confused.
