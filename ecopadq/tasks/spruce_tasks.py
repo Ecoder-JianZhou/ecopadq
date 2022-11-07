@@ -90,7 +90,7 @@ def pull_data(destination):
         teco_spruce1.to_csv('{0}/SPRUCE_forcing_{1}.txt'.format(destination, time_now),'\t',index=False)
         # Jian: drop the over range values
         teco_spruce1 = teco_spruce1.drop(teco_spruce1[(teco_spruce1.year<2011)].index)
-        # file which contain earlier data(2011-2015) Jian: now is from 2015
+        # file which contain earlier data(2011-2015) 
         j1 = pd.read_csv(initial_text,'\t')
         # file which contain the new data
         # joining both the files together and removing the duplicate rows
@@ -109,6 +109,18 @@ def pull_data(destination):
         #raise Exception('the ftp site is down..Using the old sprucing file...')    
         print(e)
         print('the ftp site is down..Using the old sprucing file...')  
+
+def merge_data(initFile, addFile, resFile):
+    # initFile: initial file that need be merged new data
+    # addFile:  the file that is used to be merged
+    # resFile:  the new file 
+    df_init = pd.read_csv(initFile,'\t') # txt
+    df_add  = pd.read_csv(addFile)       # csv
+    sYear, sDoy, sHour = df_init.iloc[-1][["year","doy","hour"]].to_list()
+    startIndex = df_add[(df_add.year==sYear)&(df_add.doy==sDoy)&(df_add.hour==sHour)].index.values[0] 
+    df_need_add = df_add.iloc[startIndex:]
+    df_new  = pd.concat([df_init,df_need_add]).drop_duplicates().reset_index(drop=True)
+    df_new.to_csv(resFile, index=False)
 
 def weather_generater():
     print("This is the module of getting weather data from NOAA ...")

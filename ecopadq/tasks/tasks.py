@@ -30,8 +30,8 @@ def run_auto_forecast(self, modname, sitname):
     '''
     print("This is auto_forecasting ...")
     task_id = str(self.request.id)          # Get the task id from portal 
-    taskObj = ecopadObj(modname, sitname)
-    results = taskObj.run_auto_forecast()
+    taskObj = ecopadObj("local_fortran_example", task_id, modname, sitname)
+    results = taskObj.auto_forecasting()
 
 # --------------------------------------------------------------------
 # test modules ...
