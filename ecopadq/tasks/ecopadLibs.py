@@ -39,11 +39,11 @@ class ecopadObj:
         # 3. run simulation
         # ----------------------------------
         # pull data
-        pull_data((os.path.join(basedir,'sites_data', site_name, 'forcing_data' ,'pull_forcing_data')))
-        pulledFile = shutil.copyfile(os.path.join(basedir,'sites_data', site_name, 'forcing_data' ,'pull_forcing_data',"SPRUCE_forcing.txt"), os.path.join(basedir,'sites_data', site_name, 'forcing_data' ,"SPRUCE_forcing.txt"))
+        pull_data((os.path.join(basedir,'sites_data', self.sitname, 'forcing_data' ,'pull_forcing_data')))
+        pulledFile = shutil.copyfile(os.path.join(basedir,'sites_data', self.sitname, 'forcing_data' ,'pull_forcing_data',"SPRUCE_forcing.txt"), os.path.join(basedir,'sites_data', self.sitname, 'forcing_data' ,"SPRUCE_forcing.txt"))
         # read future forcing data: read preset(2011-2024) data
         os.makedirs(self.resultDir+"/forcing", exist_ok = True) # create a fold to put the new forcing data
-        preWeatherFile = os.path.join(basedir,'sites_data', site_name, 'forcing_data', 'weather_generate','preset_2011-2024') # 300 files
+        preWeatherFile = os.path.join(basedir,'sites_data', self.sitname, 'forcing_data', 'weather_generate','preset_2011-2024') # 300 files
         temp_rand      = random.sample(range(1,301), 100) # 100 random from [1,300]
         ls_new_forcing     = []
         for idx, iRand in enumerate(temp_rand):
@@ -53,7 +53,7 @@ class ecopadObj:
             merge_data(pulledFile, weatherPath, newFile)
             ls_new_forcing.append(newFile)
         # read different parameters: parameters/data_assimilation
-        df_params = pd.read_csv(os.path.join(basedir,'sites_data', site_name, "parameters","data_assimilation","Paraest.txt"), header=None)
+        df_params = pd.read_csv(os.path.join(basedir,'sites_data', self.sitname, "parameters","data_assimilation","Paraest.txt"), header=None)
         ls_params = ["SLA",  "GLmax",    "GRmax",       "Gsmax", "Vcmax0", "Tau_Leaf", "Tau_Wood", "Tau_Root","Tau_F",
                      "Tau_C","Tau_Micro","Tau_SlowSOM", "Tau_Passive", "gddonset", "Q10", "Rl0","Rs0","Rr0"]
         df_params.columns = ls_params
