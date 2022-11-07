@@ -43,7 +43,7 @@ class ecopadObj:
         pull_data((os.path.join(basedir,'sites_data', self.sitname, 'forcing_data' ,'pull_forcing_data')))
         pulledFile = shutil.copyfile(os.path.join(basedir,'sites_data', self.sitname, 'forcing_data' ,'pull_forcing_data',"SPRUCE_forcing.txt"), os.path.join(basedir,'sites_data', self.sitname, 'forcing_data' ,"SPRUCE_forcing.txt"))
         # read future forcing data: read preset(2011-2024) data
-        os.makedirs(self.resultDir+"/forcing", exist_ok = True) # create a fold to put the new forcing data
+        os.makedirs(self.resultDir+"/input/forcing", exist_ok = True) # create a fold to put the new forcing data
         preWeatherFile = os.path.join(basedir,'sites_data', self.sitname, 'forcing_data', 'weather_generate','preset_2011-2024') # 300 files
         temp_rand      = random.sample(range(1,301), 10) # 100 random from [1,300]
         ls_new_forcing     = []
