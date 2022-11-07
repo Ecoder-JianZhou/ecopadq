@@ -87,7 +87,7 @@ class ecopadObj:
             with open(iSetting, 'w') as f:
                 yaml.safe_dump(doc, f, default_flow_style=False)
             # ----------------------------------------------------------------------------------------------
-            i_output=self.resultDir+"/output_"+str(iSimu)
+            i_output=self.resultDir+"/output/output_"+str(iSimu)
             os.makedirs(i_output, exist_ok=True)
             ssh_cmd = "python3 run.py {0} {1} {2}".format(iSetting, self.modname, i_output)
             print(ssh_cmd)
