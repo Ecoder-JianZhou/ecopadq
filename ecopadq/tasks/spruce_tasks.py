@@ -115,6 +115,7 @@ def merge_data(initFile, addFile, resFile):
     # initFile: initial file that need be merged new data
     # addFile:  the file that is used to be merged
     # resFile:  the new file 
+    print("test4: ",resFile)
     df_init = pd.read_csv(initFile,'\t') # txt
     df_add  = pd.read_csv(addFile)       # csv
     sYear, sDoy, sHour = df_init.iloc[-1][["year","doy","hour"]].to_list()
@@ -126,12 +127,14 @@ def merge_data(initFile, addFile, resFile):
 
 def weather_generater(nLen, initFile, outPath):
     print("This is the module of getting weather data from NOAA or preset...")
+    print("test1: ",outPath)
     res = weather_generater_preset(nLen, initFile, outPath)
     return res
 
 def weather_generater_preset(nLen, initFile, outPath):
     # Jian: use the preset of weather data (2011-2024) as old ecopad for testing
     import random, os
+    print("test2: ",outPath)
     path_presetForcing = "/data/ecopad_test/sites_data/SPRUCE/forcing_data/weather_generate/preset_2011-2024" # 300 files
     temp_rand      = random.sample(range(1,301), nLen) # 100 random from [1,300]
     ls_new_forcing     = []
@@ -139,6 +142,7 @@ def weather_generater_preset(nLen, initFile, outPath):
         str_iRand   = str(iRand).zfill(3)
         weatherPath = path_presetForcing+"/EMforcing"+str_iRand+".csv"
         newFile     = os.path.join(outPath, "/SPRUCE_forcing"+str_iRand+".txt") 
+        print("test3: ",newFile)
         merge_data(initFile, weatherPath, newFile)
         ls_new_forcing.append(newFile) 
     return ls_new_forcing

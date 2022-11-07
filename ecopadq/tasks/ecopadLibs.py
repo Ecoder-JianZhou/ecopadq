@@ -79,7 +79,7 @@ class ecopadObj:
             temp = shutil.copyfile(path_newForcing, os.path.join(taskDir_forcing,self.sitname + "_forcing.txt"))
             # ------------------------------------------------------------------------------------------------------------------
             # 2. get the future forcing data and parameter set.
-            lsPath_newForcing = mod_site.weather_generater(1, temp , taskDir_forcing)  # Jian: return list, here just use 1 (len) for test, temp=pulled data; 
+            lsPath_newForcing = mod_site.weather_generater(1, temp, taskDir_forcing)  # Jian: return list, here just use 1 (len) for test, temp=pulled data; 
             taskDir_params    = os.path.join(self.taskDir_in, "parameters")
             os.makedirs(taskDir_params, exist_ok=True)
             temp = shutil.copyfile(os.path.join(basedir, 'sites_data', self.sitname, 'parameters' ,self.sitname + "_pars.yml"), os.path.join(taskDir_params,self.sitname + "_pars.yml"))
