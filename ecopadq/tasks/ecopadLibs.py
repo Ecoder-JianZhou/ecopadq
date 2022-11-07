@@ -25,10 +25,10 @@ client.load_system_host_keys()
 
 basedir="/data/ecopad_test"
 # startYr = 2015
+ls_spec_sites  = ["SPRUCE"]
+ls_spec_models = ["TECO_SPRUCE","matrix_models","all"]  # Jian: "all" is used to test the TECO_SPRUCE AND matrix_models at SPRUCE site
 
 class ecopadObj:
-    ls_spec_sites  = ["SPRUCE"]
-    ls_spec_models = ["TECO_SPRUCE","matrix_models","all"]  # Jian: "all" is used to test the TECO_SPRUCE AND matrix_models at SPRUCE site
     def __init__(self, dockerName, task_id, modname, sitname):
         client.connect(dockerName,username=os.getenv('CELERY_SSH_USER'),password=os.getenv('CELERY_SSH_PASSWORD')) 
         self.task_id = task_id
