@@ -249,7 +249,7 @@ class ecopadObj:
         import matplotlib.pyplot as plt
         import time
         text = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-        plt.subplots(figsize=(3.45, 0.8))
+        fig,ax = plt.subplots(figsize=(3.45, 0.8))
         # ax.spines['right'].set_visible(False)
         # ax.spines['top'].set_visible(False)
         # ax.spines['bottom'].set_visible(False)
