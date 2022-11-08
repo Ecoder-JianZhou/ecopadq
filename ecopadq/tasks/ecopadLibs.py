@@ -77,6 +77,7 @@ class ecopadObj:
             taskDir_forcing = os.path.join(self.taskDir_in, "forcing")
             os.makedirs(taskDir_forcing, exist_ok=True) 
             temp = shutil.copyfile(path_newForcing, os.path.join(taskDir_forcing,self.sitname + "_forcing.txt"))
+            self.saveTime2png()
             # ------------------------------------------------------------------------------------------------------------------
             # 2. get the future forcing data and parameter set.
             lsPath_newForcing = mod_site.weather_generater(1, temp, taskDir_forcing)  # Jian: return list, here just use 1 (len) for test, temp=pulled data; 
@@ -98,6 +99,8 @@ class ecopadObj:
                     print(ssh_cmd)
                     stdin, stdout, stderr = client.exec_command(ssh_cmd)
                     result = str(stdout.read())
+            # update the time ...
+            shutil.copyfile(self.taskDir_out+"/time.png", "/webData/time.png")
         except Exception as e:
             print(e)
                 
@@ -241,6 +244,20 @@ class ecopadObj:
         self.taskDir     = taskDir
         self.taskDir_in  = taskDir_in
         self.taskDir_out = taskDir_out
+
+    def saveTime2png(self):
+        import matplotlib.pyplot as plt
+        import time
+        text = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        plt.subplots(figsize=(3.45, 0.8))
+        # ax.spines['right'].set_visible(False)
+        # ax.spines['top'].set_visible(False)
+        # ax.spines['bottom'].set_visible(False)
+        # ax.spines['left'].set_visible(False)
+        plt.axis('off')
+        plt.text(-0.1, 0.3, text, fontsize=21, transform=ax.transAxes)
+        plt.savefig(self.taskDir_out+"/time.png")
+
     
     def transfer2WebShow(self):
         # id/output/gpp.csv|npp.csv|nee.csv|er.csv|ra.csv|rh.csv|cStorage.csv
