@@ -255,7 +255,7 @@ class ecopadObj:
         # ax.spines['bottom'].set_visible(False)
         # ax.spines['left'].set_visible(False)
         plt.axis('off')
-        plt.text(-0.1, 0.3, text, fontsize=21, transform=ax.transAxes)
+        plt.text(-0.1, 0.35, text, fontsize=21, transform=ax.transAxes)
         plt.savefig(self.taskDir_out+"/time.png")
 
     
