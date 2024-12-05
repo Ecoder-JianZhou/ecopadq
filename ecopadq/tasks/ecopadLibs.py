@@ -239,6 +239,24 @@ class ecopadObj:
         taskDir_in  = "{0}/input".format(taskDir)
         taskDir_out = "{0}/output".format(taskDir)
         print("test the taskDir: ", taskDir)
+        try:
+            # Attempt to create a directory locally
+            os.makedirs("/data/test2", exist_ok=True)
+            print("Directory '/data/test2' created successfully.")
+        except PermissionError as e:
+            print(f"PermissionError: {e}. Falling back to remote creation...")
+            try:
+                # Use the SSH client to execute a command on the remote host
+                stdin, stdout, stderr = client.exec_command('mkdir -p /data/test2')
+                error_msg = stderr.read().decode()
+                if error_msg:
+                    print(f"Error during remote directory creation: {error_msg}")
+                else:
+                    print("Remote directory '/data/test2' created successfully.")
+            except Exception as ssh_error:
+                print(f"SSH command failed: {ssh_error}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
         os.makedirs(taskDir,     exist_ok=True)
         os.makedirs(taskDir_in,  exist_ok=True)
         os.makedirs(taskDir_out, exist_ok=True)
