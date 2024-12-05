@@ -20,7 +20,7 @@ import numpy as np
 from .ecopadLibs import ecopadObj
 
 basedir  = "/data/ecopad_test"                 # Default base directory
-CTN_name = "local_fortran_example"          # Jian: maybe have other container future
+CTN_name = "spruce_site"#"local_fortran_example"          # Jian: maybe have other container future
 
 app = Celery()
 app.config_from_object(celeryconfig)
