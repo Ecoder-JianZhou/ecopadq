@@ -41,7 +41,7 @@ class ecopadObj:
         self.sitname = sitname
         # ---------------------
         self.check_model_site()
-        self.setup_result_directory()
+        # self.setup_result_directory() # Jian: not finished yet
         self.experiment = "lastest_forecast_results_380ppm_0degree"
 
     def check_model_site(self):
@@ -213,13 +213,13 @@ class ecopadObj:
     def run_simulation(self):
         # call for the run.py in each model docker. 
         print("simulation ....")
-        # ssh_cmd = "python3 run.py {0} {1} {2}".format(os.path.join(basedir, "sites_data", self.sitname,"setting.yml"), self.modname, self.resultDir)
-        # print(ssh_cmd)
-        # stdin, stdout, stderr = client.exec_command(ssh_cmd)
-        # result = str(stdout.read())
+        ssh_cmd = "python3 run.py {0} {1} {2}".format(os.path.join(basedir, "sites_data", self.sitname,"setting.yml"), self.modname, self.resultDir)
+        print(ssh_cmd)
+        stdin, stdout, stderr = client.exec_command(ssh_cmd)
+        result = str(stdout.read())
         # if self.modname == "all":  
         #     self.transfer2WebShow() # test forecasting
-        # return result
+        return result
 
     def run_spinup(self):
         print("spinup ...")
