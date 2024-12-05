@@ -238,6 +238,7 @@ class ecopadObj:
         taskDir     = os.path.join(basedir, 'ecopad_tasks/', self.task_id)
         taskDir_in  = "{0}/input".format(taskDir)
         taskDir_out = "{0}/output".format(taskDir)
+        print("test the taskDir: ", taskDir)
         os.makedirs(taskDir,     exist_ok=True)
         os.makedirs(taskDir_in,  exist_ok=True)
         os.makedirs(taskDir_out, exist_ok=True)
