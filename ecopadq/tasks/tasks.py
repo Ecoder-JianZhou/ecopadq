@@ -41,8 +41,8 @@ def test_run_simulation(self, modname, sitname):
     print("This is the simulaiton ...")
     task_id = str(self.request.id)          # Get the task id from portal
     taskObj = ecopadObj(CTN_name, task_id, modname, sitname)
-    # results = taskObj.run_simulation()
-    results = taskObj.run_auto_forecast()
+    results = taskObj.run_simulation()
+    # results = taskObj.run_auto_forecast()
 
 @app.task(bind=True)
 def test_run_data_assimilation(self, modname, sitname):
